@@ -1,0 +1,31 @@
+# Build output
+build/
+out/
+bin/
+*.class
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local tooling (not part of the course)
+.claude/
+
+# Logs and temp
+*.log
+*.tmp
+hs_err_pid*
