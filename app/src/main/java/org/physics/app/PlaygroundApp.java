@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.physics.app.scene.CollisionScene;
 import org.physics.app.scene.GasScene;
+import org.physics.app.scene.OrbitScene;
 import org.physics.app.scene.Scene;
 import org.physics.app.scene.SpringScene;
 
@@ -60,6 +61,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new SpringScene());
     scenes.add(new CollisionScene());
     scenes.add(new GasScene());
+    scenes.add(new OrbitScene());
     scenes.get(current).show();
   }
 
@@ -134,12 +136,9 @@ public class PlaygroundApp extends ApplicationAdapter {
   }
 
   private String controlsLine() {
-    StringBuilder line = new StringBuilder();
-    for (int i = 0; i < scenes.size(); i++) {
-      line.append(i + 1).append(' ').append(scenes.get(i).title()).append("    ");
-    }
-    line.append("|   R reset   |   click or drag to interact");
-    return line.toString();
+    return "keys 1-"
+        + scenes.size()
+        + " switch scenes   |   R reset   |   click or drag to interact";
   }
 
   @Override
