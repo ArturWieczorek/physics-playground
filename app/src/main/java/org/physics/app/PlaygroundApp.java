@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
 import java.util.List;
 import org.physics.app.scene.CollisionScene;
+import org.physics.app.scene.GasScene;
 import org.physics.app.scene.Scene;
 import org.physics.app.scene.SpringScene;
 
@@ -58,6 +59,7 @@ public class PlaygroundApp extends ApplicationAdapter {
 
     scenes.add(new SpringScene());
     scenes.add(new CollisionScene());
+    scenes.add(new GasScene());
     scenes.get(current).show();
   }
 
@@ -83,6 +85,15 @@ public class PlaygroundApp extends ApplicationAdapter {
     }
     if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
       scenes.get(current).reset();
+    }
+    // Forward a few extra keys that scenes use for their own controls (heating a gas, and so on).
+    for (int key :
+        new int[] {
+          Input.Keys.UP, Input.Keys.DOWN, Input.Keys.LEFT, Input.Keys.RIGHT, Input.Keys.SPACE
+        }) {
+      if (Gdx.input.isKeyJustPressed(key)) {
+        scenes.get(current).keyPressed(key);
+      }
     }
 
     if (Gdx.input.isTouched()) {

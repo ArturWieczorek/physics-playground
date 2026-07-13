@@ -36,6 +36,9 @@ public interface Scene {
   /** The pointer was released. */
   default void pointerUp() {}
 
+  /** A key was pressed. The app forwards a handful of keys (the arrows and space) to the scene. */
+  default void keyPressed(int keycode) {}
+
   /** Releases any resources when the scene goes away. */
   default void dispose() {}
 }
