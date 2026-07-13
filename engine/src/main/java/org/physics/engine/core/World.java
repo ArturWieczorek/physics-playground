@@ -52,6 +52,11 @@ public class World {
       force.apply(bodies);
     }
     for (Particle body : bodies) {
+      if (body.isPinned()) {
+        // A pinned body never moves, so leave its position alone and keep it still.
+        body.setVelocity(Vector2.ZERO);
+        continue;
+      }
       Vector2 acceleration = body.acceleration();
       Vector2 newVelocity = body.velocity().add(acceleration.scale(dt));
       body.setVelocity(newVelocity);

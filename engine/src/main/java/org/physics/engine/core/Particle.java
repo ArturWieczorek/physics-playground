@@ -22,6 +22,11 @@ public class Particle {
   // moved. It is reset to zero at the start of every step.
   private Vector2 force = Vector2.ZERO;
 
+  // A pinned particle is nailed in place: it still feels forces, but the world never moves it. We
+  // use it for a spring's fixed anchor (ch05) and for the corners a piece of cloth hangs from
+  // (ch12).
+  private boolean pinned = false;
+
   public Particle(Vector2 position, Vector2 velocity, double mass) {
     if (mass <= 0) {
       throw new IllegalArgumentException("mass must be positive: " + mass);
@@ -49,6 +54,22 @@ public class Particle {
 
   public void setVelocity(Vector2 velocity) {
     this.velocity = velocity;
+  }
+
+  public boolean isPinned() {
+    return pinned;
+  }
+
+  /** Nails the particle in place. It keeps its current position no matter what forces act on it. */
+  public Particle pin() {
+    this.pinned = true;
+    return this;
+  }
+
+  /** Releases a pinned particle so it can move again. */
+  public Particle unpin() {
+    this.pinned = false;
+    return this;
   }
 
   /** Forgets the forces from the previous step. Called at the start of each step. */

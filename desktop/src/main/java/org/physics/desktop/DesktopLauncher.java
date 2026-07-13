@@ -17,7 +17,7 @@ public final class DesktopLauncher {
   public static void main(String[] args) {
     Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
     config.setTitle("Physics Playground");
-    config.setWindowedMode(1024, 720);
+    config.setWindowedMode(1280, 720);
     config.useVsync(true);
     config.setForegroundFPS(60);
     new Lwjgl3Application(new PlaygroundApp(), config);
