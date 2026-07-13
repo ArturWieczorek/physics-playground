@@ -27,6 +27,10 @@ public class Particle {
   // (ch12).
   private boolean pinned = false;
 
+  // How big the particle is, for collisions (ch06). A point has no size, but real bumping needs a
+  // radius so two particles can touch. Defaults to something small.
+  private double radius = 0.2;
+
   public Particle(Vector2 position, Vector2 velocity, double mass) {
     if (mass <= 0) {
       throw new IllegalArgumentException("mass must be positive: " + mass);
@@ -54,6 +58,30 @@ public class Particle {
 
   public void setVelocity(Vector2 velocity) {
     this.velocity = velocity;
+  }
+
+  public double radius() {
+    return radius;
+  }
+
+  /**
+   * Sets the collision radius and returns the particle, for easy chaining when building a scene.
+   */
+  public Particle radius(double radius) {
+    if (radius < 0) {
+      throw new IllegalArgumentException("radius must not be negative: " + radius);
+    }
+    this.radius = radius;
+    return this;
+  }
+
+  /**
+   * The inverse of the mass, treating a pinned particle as infinitely heavy (inverse mass zero).
+   * Collision maths is written in terms of inverse mass because "how much does a push move this?"
+   * is what matters, and an immovable wall is simply something with an inverse mass of zero.
+   */
+  public double inverseMass() {
+    return pinned ? 0.0 : 1.0 / mass;
   }
 
   public boolean isPinned() {

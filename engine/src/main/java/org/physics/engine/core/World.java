@@ -3,6 +3,7 @@ package org.physics.engine.core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.physics.engine.collide.Constraint;
 import org.physics.engine.force.Force;
 import org.physics.engine.math.Vector2;
 
@@ -26,6 +27,7 @@ public class World {
 
   private final List<Particle> bodies = new ArrayList<>();
   private final List<Force> forces = new ArrayList<>();
+  private final List<Constraint> constraints = new ArrayList<>();
 
   /** Adds a particle and returns it, so callers can keep a handle on it. */
   public Particle add(Particle particle) {
@@ -36,6 +38,11 @@ public class World {
   /** Registers a force that will act on the particles each step. */
   public void addForce(Force force) {
     forces.add(force);
+  }
+
+  /** Registers a constraint, resolved after the particles have moved each step. */
+  public void addConstraint(Constraint constraint) {
+    constraints.add(constraint);
   }
 
   /** The particles, as a read-only list. */
@@ -61,6 +68,12 @@ public class World {
       Vector2 newVelocity = body.velocity().add(acceleration.scale(dt));
       body.setVelocity(newVelocity);
       body.setPosition(body.position().add(newVelocity.scale(dt)));
+    }
+
+    // Now that everything has moved, fix anything that broke: overlaps, escapes from the box, and
+    // so on. Constraints run in the order they were added.
+    for (Constraint constraint : constraints) {
+      constraint.resolve(bodies);
     }
   }
 }
