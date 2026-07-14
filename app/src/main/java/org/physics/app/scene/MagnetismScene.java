@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.physics.engine.collide.BoxBounds;
 import org.physics.engine.core.Particle;
-import org.physics.engine.core.World;
-import org.physics.engine.force.LorentzForce;
+import org.physics.engine.force.BorisPusher;
 import org.physics.engine.math.Vector2;
 
 /**
@@ -28,8 +27,9 @@ public class MagnetismScene implements Scene {
   private static final int TRAIL_LENGTH = 220;
   private static final double LAUNCH_SPEED = 4.0;
 
-  private World world;
   private final List<Trace> traces = new ArrayList<>();
+  private final List<Particle> charges = new ArrayList<>();
+  private BoxBounds bounds;
   private double magneticField = 1.5;
   private Vector2 electricField = Vector2.ZERO;
   private float timeBudget;
@@ -60,10 +60,11 @@ public class MagnetismScene implements Scene {
   @Override
   public void reset() {
     traces.clear();
+    charges.clear();
+    bounds = new BoxBounds(0.2, 0.2, 15.8, 8.8, 1.0);
     magneticField = 1.5;
     electricField = Vector2.ZERO;
     nextSign = 1.0;
-    rebuild();
 
     // Start with one of each sign so the opposite curling is visible straight away.
     launch(new Vector2(6, 4.5), new Vector2(0, LAUNCH_SPEED), 1.0);
@@ -71,29 +72,21 @@ public class MagnetismScene implements Scene {
     timeBudget = 0f;
   }
 
-  // The Lorentz force holds a fixed field, so when the field changes we build a fresh world around
-  // the same charges (they keep their position and velocity, since we reuse the objects).
-  private void rebuild() {
-    World fresh = new World();
-    for (Trace trace : traces) {
-      fresh.add(trace.particle);
-    }
-    fresh.addForce(new LorentzForce(electricField, magneticField));
-    fresh.addConstraint(new BoxBounds(0.2, 0.2, 15.8, 8.8, 1.0));
-    world = fresh;
-  }
-
   private void launch(Vector2 position, Vector2 velocity, double sign) {
     Particle charge = new Particle(position, velocity, 1.0).radius(0.14).charge(sign);
     traces.add(new Trace(charge, sign >= 0));
-    rebuild();
+    charges.add(charge);
   }
 
   @Override
   public void update(float dt) {
     timeBudget += Math.min(dt, 0.1f);
     while (timeBudget >= FIXED_DT) {
-      world.step(FIXED_DT);
+      // The Boris pusher keeps the cyclotron circles closed instead of spiralling.
+      for (Trace trace : traces) {
+        BorisPusher.step(trace.particle, electricField, magneticField, FIXED_DT);
+      }
+      bounds.resolve(charges);
       timeBudget -= FIXED_DT;
     }
     for (Trace trace : traces) {
@@ -111,16 +104,12 @@ public class MagnetismScene implements Scene {
   public void keyPressed(int keycode) {
     if (keycode == Input.Keys.RIGHT) {
       magneticField += 0.3;
-      rebuild();
     } else if (keycode == Input.Keys.LEFT) {
       magneticField -= 0.3;
-      rebuild();
     } else if (keycode == Input.Keys.UP) {
       electricField = electricField.add(new Vector2(1.0, 0));
-      rebuild();
     } else if (keycode == Input.Keys.DOWN) {
       electricField = electricField.add(new Vector2(-1.0, 0));
-      rebuild();
     }
   }
 

@@ -148,9 +148,10 @@ public class GasScene implements Scene {
     double[] density = new double[BINS];
     for (Particle body : bodies) {
       int bin = (int) (body.velocity().length() / binWidth);
-      if (bin >= 0 && bin < BINS) {
-        density[bin] += 1.0 / (bodies.size() * binWidth);
-      }
+      // Put anything past the last bin into it, so no fast particles are dropped and the bars
+      // still add up to the full distribution (otherwise they sit below the theory curve).
+      bin = Math.max(0, Math.min(BINS - 1, bin));
+      density[bin] += 1.0 / (bodies.size() * binWidth);
     }
 
     // Pick a vertical scale so the tallest of (bars, theory peak) fills the strip.

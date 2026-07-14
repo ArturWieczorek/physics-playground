@@ -98,14 +98,14 @@ public class FluidScene implements Scene {
       }
     }
 
-    // Tune the rest density to this starting block, so the fluid begins near equilibrium rather
-    // than immediately exploding apart or collapsing.
+    // Tune the rest density to this starting block so the fluid begins at equilibrium. We use the
+    // median density, not the mean: particles at the free surface have fewer neighbours and so a
+    // lower density, and averaging them in would set the target too low and make the block puff
+    // outward on the first frame. The median reflects the packed interior.
     double[] density = sph.densities(bodies);
-    double average = 0;
-    for (double d : density) {
-      average += d;
-    }
-    sph.setRestDensity(average / density.length * 0.9);
+    double[] sorted = density.clone();
+    java.util.Arrays.sort(sorted);
+    sph.setRestDensity(sorted[sorted.length / 2]);
 
     timeBudget = 0f;
     lastPointer = null;
