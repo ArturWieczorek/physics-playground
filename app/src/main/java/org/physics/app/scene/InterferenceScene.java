@@ -31,7 +31,7 @@ public class InterferenceScene implements Scene {
   private static final double MID_Y = 4.5;
   private static final double TOP = 8.7;
   private static final double BOTTOM = 0.3;
-  private static final double CELL = 0.16;
+  private static final double CELL = 0.22; // coarse enough to stay smooth on the web build
   private static final double SPEED = 3.0;
 
   private boolean twoSlits = true;
