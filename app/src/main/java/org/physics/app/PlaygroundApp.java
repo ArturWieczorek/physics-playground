@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
 import java.util.List;
 import org.physics.app.scene.ChargesScene;
+import org.physics.app.scene.ClothScene;
 import org.physics.app.scene.CollisionScene;
 import org.physics.app.scene.GasScene;
 import org.physics.app.scene.MagnetismScene;
@@ -68,6 +69,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new ChargesScene());
     scenes.add(new MagnetismScene());
     scenes.add(new MolecularScene());
+    scenes.add(new ClothScene());
     scenes.get(current).show();
   }
 
