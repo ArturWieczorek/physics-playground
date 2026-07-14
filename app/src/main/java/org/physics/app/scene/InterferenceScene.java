@@ -1,6 +1,7 @@
 package org.physics.app.scene;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import java.util.ArrayList;
@@ -31,8 +32,15 @@ public class InterferenceScene implements Scene {
   private static final double MID_Y = 4.5;
   private static final double TOP = 8.7;
   private static final double BOTTOM = 0.3;
-  private static final double CELL = 0.22; // coarse enough to stay smooth on the web build
+  private static final double FIELD_STEP = 0.26; // wave-field mesh spacing (smoothed by the GPU)
+  private static final double SCREEN_STEP = 0.06; // fine, so the fringe bars look continuous
   private static final double SPEED = 3.0;
+
+  // Reused colours for the four corners of each mesh cell, to avoid allocating every frame.
+  private final Color cornerA = new Color();
+  private final Color cornerB = new Color();
+  private final Color cornerC = new Color();
+  private final Color cornerD = new Color();
 
   private boolean twoSlits = true;
   private double wavelength = 0.7;
@@ -107,14 +115,39 @@ public class InterferenceScene implements Scene {
     double maxAmp = sources.size();
     double maxIntensity = sources.size() * sources.size();
 
-    shapes.begin(ShapeType.Filled);
+    // Sample the wave height on a grid of vertices.
+    int nx = (int) Math.ceil((FIELD_RIGHT - BARRIER_X) / FIELD_STEP);
+    int ny = (int) Math.ceil((TOP - BOTTOM) / FIELD_STEP);
+    float[] vx = new float[nx + 1];
+    float[] vy = new float[ny + 1];
+    float[][] amp = new float[nx + 1][ny + 1];
+    for (int i = 0; i <= nx; i++) {
+      vx[i] = (float) (BARRIER_X + i * FIELD_STEP);
+    }
+    for (int j = 0; j <= ny; j++) {
+      vy[j] = (float) (BOTTOM + j * FIELD_STEP);
+    }
+    for (int i = 0; i <= nx; i++) {
+      for (int j = 0; j <= ny; j++) {
+        amp[i][j] =
+            (float)
+                (Interference.amplitudeAt(sources, wavelength, SPEED, vx[i], vy[j], time) / maxAmp);
+      }
+    }
 
-    // The live wave field, red for crests and blue for troughs.
-    for (double x = BARRIER_X; x <= FIELD_RIGHT; x += CELL) {
-      for (double y = BOTTOM; y <= TOP; y += CELL) {
-        double n = Interference.amplitudeAt(sources, wavelength, SPEED, x, y, time) / maxAmp;
-        shapes.setColor((float) Math.max(0, n), 0.05f, (float) Math.max(0, -n), 1f);
-        shapes.rect((float) x, (float) y, (float) CELL, (float) CELL);
+    // Draw the field as coloured triangles; the GPU blends the corner colours smoothly across each
+    // cell, so the wave looks continuous instead of blocky.
+    shapes.begin(ShapeType.Filled);
+    for (int i = 0; i < nx; i++) {
+      for (int j = 0; j < ny; j++) {
+        fieldColor(cornerA, amp[i][j]);
+        fieldColor(cornerB, amp[i + 1][j]);
+        fieldColor(cornerC, amp[i + 1][j + 1]);
+        fieldColor(cornerD, amp[i][j + 1]);
+        shapes.triangle(
+            vx[i], vy[j], vx[i + 1], vy[j], vx[i + 1], vy[j + 1], cornerA, cornerB, cornerC);
+        shapes.triangle(
+            vx[i], vy[j], vx[i + 1], vy[j + 1], vx[i], vy[j + 1], cornerA, cornerC, cornerD);
       }
     }
 
@@ -126,24 +159,30 @@ public class InterferenceScene implements Scene {
       shapes.rect((float) BARRIER_X - 0.09f, (float) (s.y() - 0.22), 0.18f, 0.44f);
     }
 
-    // The screen, and the brightness it records as bright bars reaching right.
+    // The screen, and the brightness it records as fine bright bars reaching right.
     shapes.setColor(0.25f, 0.27f, 0.32f, 1f);
     shapes.rect((float) SCREEN_X, (float) BOTTOM, 0.06f, (float) (TOP - BOTTOM));
-    for (double y = BOTTOM; y <= TOP; y += CELL) {
+    for (double y = BOTTOM; y <= TOP; y += SCREEN_STEP) {
       double intensity = Interference.intensityAt(sources, wavelength, SCREEN_X, y) / maxIntensity;
       float b = (float) Math.min(1.0, intensity);
       shapes.setColor(b, b * 0.95f, b * 0.7f, 1f); // warm white
       shapes.rect(
-          (float) (SCREEN_X + 0.08), (float) y, (float) (intensity * PROFILE_WIDTH), (float) CELL);
+          (float) (SCREEN_X + 0.08),
+          (float) y,
+          (float) (intensity * PROFILE_WIDTH),
+          (float) SCREEN_STEP + 0.005f);
     }
-    shapes.end();
 
     // The slit sources marked as small dots.
-    shapes.begin(ShapeType.Filled);
     shapes.setColor(1f, 0.9f, 0.4f, 1f);
     for (Vector2 s : sources) {
       shapes.circle((float) s.x(), (float) s.y(), 0.08f, 10);
     }
     shapes.end();
+  }
+
+  // Red for crests, blue for troughs, dark near zero.
+  private void fieldColor(Color color, float n) {
+    color.set(Math.max(0, n), 0.05f, Math.max(0, -n), 1f);
   }
 }
