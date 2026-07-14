@@ -29,6 +29,37 @@ final class Draw {
     shapes.rectLine((float) x1, (float) y1, (float) x2, (float) y2, width);
   }
 
+  /** A thick line with an arrowhead at the (x2, y2) end. */
+  static void arrow(
+      ShapeRenderer shapes, double x1, double y1, double x2, double y2, float width, double head) {
+    shapes.rectLine((float) x1, (float) y1, (float) x2, (float) y2, width);
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double len = Math.hypot(dx, dy);
+    if (len < 1e-9) {
+      return;
+    }
+    double ux = dx / len;
+    double uy = dy / len;
+    double cos = Math.cos(Math.toRadians(30));
+    double sin = Math.sin(Math.toRadians(30));
+    // Two short strokes back from the tip, rotated either side of the incoming direction.
+    double bx = -ux;
+    double by = -uy;
+    shapes.rectLine(
+        (float) x2,
+        (float) y2,
+        (float) (x2 + (bx * cos - by * sin) * head),
+        (float) (y2 + (bx * sin + by * cos) * head),
+        width);
+    shapes.rectLine(
+        (float) x2,
+        (float) y2,
+        (float) (x2 + (bx * cos + by * sin) * head),
+        (float) (y2 + (-bx * sin + by * cos) * head),
+        width);
+  }
+
   /** The outline of a rectangle, drawn as four thick lines. Used to show a scene's walls. */
   static void box(
       ShapeRenderer shapes, double left, double bottom, double right, double top, float width) {

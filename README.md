@@ -25,6 +25,7 @@ A single app with a menu of scenes, each one a small experiment:
 - A pool of fluid you can splash and stir
 - A race down three ramps where the cleverest curve, not the straight one, wins
 - A double pendulum swinging in never-repeating chaos
+- Light drawn as its electric and magnetic fields, a travelling wave
 
 ## How it is organised
 
@@ -74,6 +75,7 @@ and see exactly the code as it stood at that point.
 | ch14 | Shipping it: desktop and web builds |
 | ch15 | The brachistochrone: the fastest descent |
 | ch16 | The double pendulum and chaos |
+| ch17 | Light: an electromagnetic wave |
 
 ## Running it
 
