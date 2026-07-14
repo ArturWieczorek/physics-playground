@@ -32,6 +32,7 @@ A single app with a menu of scenes, each one a small experiment:
 - A 3D landscape with gradient arrows pointing uphill, perpendicular to its contours
 - The double-slit experiment: waves through two slits painting fringes on a screen
 - Fourier series drawn as spinning circles that build a square wave
+- The Lorenz attractor, the butterfly-shaped emblem of chaos, drawn in 3D
 
 ## How it is organised
 
@@ -88,6 +89,7 @@ and see exactly the code as it stood at that point.
 | ch21 | Gradients and partial derivatives (3D) |
 | ch22 | The double-slit experiment |
 | ch23 | Fourier series: drawing waves with circles |
+| ch24 | The Lorenz attractor (3D) |
 
 ## Running it
 

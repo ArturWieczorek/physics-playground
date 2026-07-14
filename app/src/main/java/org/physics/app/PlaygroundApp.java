@@ -29,6 +29,7 @@ import org.physics.app.scene.GradientScene;
 import org.physics.app.scene.InterferenceScene;
 import org.physics.app.scene.LaplaceScene;
 import org.physics.app.scene.LightScene;
+import org.physics.app.scene.LorenzScene;
 import org.physics.app.scene.MagnetismScene;
 import org.physics.app.scene.MolecularScene;
 import org.physics.app.scene.OrbitScene;
@@ -99,6 +100,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new GradientScene());
     scenes.add(new InterferenceScene());
     scenes.add(new FourierScene());
+    scenes.add(new LorenzScene());
     scenes.get(current).show();
   }
 
