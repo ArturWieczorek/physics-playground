@@ -17,6 +17,10 @@ dependencies {
   implementation("com.badlogicgames.gdx:gdx:$gdxVersion")
 }
 
+// The custom domain the GitHub Pages site is served from. GitHub needs this in a CNAME file at the
+// publishing root (docs/); we rewrite it on every build because the build wipes docs/ first.
+val pagesDomain = "physics.arturwieczorek.com"
+
 // "./gradlew web:buildWeb" compiles to JS/WebGL and copies the result into docs/.
 tasks.register<JavaExec>("buildWeb") {
   group = "web"
@@ -31,5 +35,6 @@ tasks.register<JavaExec>("buildWeb") {
       from(layout.buildDirectory.dir("dist/webapp")) // put index.html at the docs/ root
       into(docs)
     }
+    java.io.File(docs, "CNAME").writeText(pagesDomain + "\n") // keep the custom domain across builds
   }
 }
