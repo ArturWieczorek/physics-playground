@@ -51,6 +51,15 @@ class HydrogenOrbitalTest {
   }
 
   @Test
+  @DisplayName("the 2p orbital decays as e^(-r/2), pinning its shell size")
+  void twoPDecayConstant() {
+    // Along +z the value is z * e^(-r/2) = r e^(-r/2). The ratio at r=2 and r=4 fixes the 1/2.
+    double atTwo = HydrogenOrbital.TWO_P_Z.value(0, 0, 2); // 2 e^(-1)
+    double atFour = HydrogenOrbital.TWO_P_Z.value(0, 0, 4); // 4 e^(-2)
+    assertEquals(Math.E / 2, atTwo / atFour, 1e-9); // (2 e^-1)/(4 e^-2) = e/2
+  }
+
+  @Test
   @DisplayName("density is the square of the wavefunction and never negative")
   void densityIsNonNegative() {
     for (HydrogenOrbital orbital : HydrogenOrbital.values()) {

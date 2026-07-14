@@ -36,6 +36,9 @@ public class GradientScene implements Scene {
   private PerspectiveCamera camera;
   private double azimuth = 0.8;
   private double elevation = 0.5;
+  private float[][] surface;
+  private double surfaceMax;
+  private boolean dirty = true;
 
   @Override
   public String title() {
@@ -66,6 +69,7 @@ public class GradientScene implements Scene {
     current = 0;
     azimuth = 0.8;
     elevation = 0.5;
+    dirty = true;
   }
 
   @Override
@@ -74,36 +78,47 @@ public class GradientScene implements Scene {
       current = (current + 1) % fields.length;
     } else if (keycode == Input.Keys.LEFT) {
       current = (current - 1 + fields.length) % fields.length;
+    } else {
+      return;
     }
+    dirty = true;
   }
 
-  @Override
-  public void update(float dt) {
+  // Camera orbiting lives here (not in update) so it keeps working even while the app is paused.
+  private void orbit() {
     if (Gdx.input.isTouched()) {
       azimuth -= Gdx.input.getDeltaX() * 0.01;
       elevation += Gdx.input.getDeltaY() * 0.01;
       elevation = Math.max(0.1, Math.min(1.4, elevation));
     } else {
-      azimuth += dt * 0.2;
+      azimuth += Gdx.graphics.getDeltaTime() * 0.2;
     }
   }
 
-  @Override
-  public void render(ShapeRenderer shapes) {
-    positionCamera();
+  // Sample the surface once, only when the landscape changes.
+  private void sampleSurface() {
     ScalarField field = fields[current];
-
-    // Sample the surface, tracking the largest height so we can scale it to the screen.
-    float[][] height = new float[GRID + 1][GRID + 1];
-    double maxAbs = 1e-9;
+    surface = new float[GRID + 1][GRID + 1];
+    surfaceMax = 1e-9;
     for (int i = 0; i <= GRID; i++) {
       double x = domain(i);
       for (int j = 0; j <= GRID; j++) {
         double v = field.value(x, domain(j));
-        height[i][j] = (float) v;
-        maxAbs = Math.max(maxAbs, Math.abs(v));
+        surface[i][j] = (float) v;
+        surfaceMax = Math.max(surfaceMax, Math.abs(v));
       }
     }
+    dirty = false;
+  }
+
+  @Override
+  public void render(ShapeRenderer shapes) {
+    orbit();
+    positionCamera();
+    if (dirty) {
+      sampleSurface();
+    }
+    ScalarField field = fields[current];
 
     Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
     Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
@@ -114,10 +129,10 @@ public class GradientScene implements Scene {
     for (int i = 0; i <= GRID; i++) {
       for (int j = 0; j <= GRID; j++) {
         if (i < GRID) {
-          surfaceEdge(shapes, i, j, i + 1, j, height, maxAbs);
+          surfaceEdge(shapes, i, j, i + 1, j, surface, surfaceMax);
         }
         if (j < GRID) {
-          surfaceEdge(shapes, i, j, i, j + 1, height, maxAbs);
+          surfaceEdge(shapes, i, j, i, j + 1, surface, surfaceMax);
         }
       }
     }

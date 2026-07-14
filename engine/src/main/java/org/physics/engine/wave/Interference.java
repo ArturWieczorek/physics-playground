@@ -23,28 +23,31 @@ public final class Interference {
       List<Vector2> sources, double wavelength, double speed, double x, double y, double t) {
     double k = 2 * Math.PI / wavelength;
     double omega = speed * k;
-    Vector2 point = new Vector2(x, y);
     double sum = 0;
     for (Vector2 source : sources) {
-      double r = point.distanceTo(source);
+      double dx = x - source.x();
+      double dy = y - source.y();
+      double r = Math.sqrt(dx * dx + dy * dy);
       sum += Math.sin(k * r - omega * t);
     }
     return sum;
   }
 
   /**
-   * The brightness (intensity) at a point: how strong the wave is there, averaged over time. This
-   * is what a screen or a camera actually records, and it does not depend on time. We add up the
-   * waves as rotating phasors and take the squared length of the total, which is the standard way
-   * to combine coherent waves.
+   * The brightness (intensity) at a point: how strong the wave is there. This is what a screen or a
+   * camera records, and it does not depend on time. We add up the waves as rotating phasors and
+   * take the squared length of the total, {@code |sum of e^(i k r)|^2}, which is the standard way
+   * to combine coherent waves. (It is proportional to the squared peak amplitude; the constant does
+   * not matter, since only the pattern of bright and dark is meaningful here.)
    */
   public static double intensityAt(List<Vector2> sources, double wavelength, double x, double y) {
     double k = 2 * Math.PI / wavelength;
-    Vector2 point = new Vector2(x, y);
     double real = 0;
     double imaginary = 0;
     for (Vector2 source : sources) {
-      double r = point.distanceTo(source);
+      double dx = x - source.x();
+      double dy = y - source.y();
+      double r = Math.sqrt(dx * dx + dy * dy);
       real += Math.cos(k * r);
       imaginary += Math.sin(k * r);
     }

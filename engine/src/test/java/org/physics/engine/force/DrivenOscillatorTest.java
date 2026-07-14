@@ -36,6 +36,24 @@ class DrivenOscillatorTest {
     assertTrue(maxOn > maxOff * 3, "on-resonance " + maxOn + " vs off " + maxOff);
   }
 
+  @Test
+  @DisplayName("the stepped motion settles to the amplitude the formula predicts")
+  void steppedMotionMatchesTheFormula() {
+    double drive = 3.0;
+    DrivenOscillator o = new DrivenOscillator(1, 20, 0.6, 6);
+    for (int i = 0; i < 40000; i++) {
+      o.step(drive, 0.001); // let the start-up transient die away
+    }
+    double peak = 0;
+    int stepsPerPeriod = (int) (2 * Math.PI / drive / 0.001);
+    for (int i = 0; i < stepsPerPeriod; i++) {
+      o.step(drive, 0.001);
+      peak = Math.max(peak, Math.abs(o.position()));
+    }
+    double predicted = o.steadyAmplitude(drive);
+    assertEquals(predicted, peak, predicted * 0.1);
+  }
+
   private static double peakSwing(double driveFrequency) {
     DrivenOscillator o = new DrivenOscillator(1, 20, 0.6, 6);
     double peak = 0;

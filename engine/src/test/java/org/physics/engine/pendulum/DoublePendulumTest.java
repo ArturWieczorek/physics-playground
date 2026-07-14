@@ -37,15 +37,18 @@ class DoublePendulumTest {
   }
 
   @Test
-  @DisplayName("the bobs stay a fixed distance from their pivots (the rods are rigid)")
-  void rodsKeepTheirLength() {
-    DoublePendulum p = new DoublePendulum(1, 2, 1.5, 2.0, 9.8, 1.0, 0.5);
-    Vector2 pivot = new Vector2(3, 4);
-    for (int i = 0; i < 500; i++) {
+  @DisplayName("released from small angles it swings gently and stays near the bottom (stable)")
+  void smallOscillationsStayBounded() {
+    // Near hanging-straight-down, the double pendulum is a stable pair of coupled oscillators, so a
+    // small release should stay small. A broken integrator would let it grow and fling out.
+    DoublePendulum p = new DoublePendulum(1, 1, 1, 1, 9.8, 0.15, 0.15);
+    Vector2 pivot = new Vector2(0, 0);
+    Vector2 bottom = new Vector2(0, -2); // both rods hanging straight down (l1 + l2)
+    double worst = 0;
+    for (int i = 0; i < 6000; i++) {
       p.step(0.005);
+      worst = Math.max(worst, p.bob2(pivot).distanceTo(bottom));
     }
-    double rod1 = p.bob1(pivot).distanceTo(pivot);
-    double rod2 = p.bob2(pivot).distanceTo(p.bob1(pivot));
-    assertTrue(Math.abs(rod1 - 1.5) < 1e-9 && Math.abs(rod2 - 2.0) < 1e-9);
+    assertTrue(worst < 0.7, "small oscillations should stay near the bottom, worst was " + worst);
   }
 }

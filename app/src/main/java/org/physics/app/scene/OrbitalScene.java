@@ -2,7 +2,6 @@ package org.physics.app.scene;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -23,7 +22,7 @@ import org.physics.engine.quantum.HydrogenOrbital;
  */
 public class OrbitalScene implements Scene {
 
-  private static final int TARGET_POINTS = 8000;
+  private static final int TARGET_POINTS = 4000;
   // Peaked orbitals (1s) accept only a small fraction of proposals, so give the sampler a generous
   // budget. This runs only when you switch orbitals, not every frame.
   private static final int MAX_ATTEMPTS = 2_000_000;
@@ -133,19 +132,20 @@ public class OrbitalScene implements Scene {
     };
   }
 
-  @Override
-  public void update(float dt) {
+  // Camera orbiting lives here (not in update) so it keeps working even while the app is paused.
+  private void orbit() {
     if (Gdx.input.isTouched()) {
       azimuth -= Gdx.input.getDeltaX() * 0.01;
       elevation += Gdx.input.getDeltaY() * 0.01;
       elevation = Math.max(-1.4, Math.min(1.4, elevation));
     } else {
-      azimuth += dt * 0.25;
+      azimuth += Gdx.graphics.getDeltaTime() * 0.25;
     }
   }
 
   @Override
   public void render(ShapeRenderer shapes) {
+    orbit();
     camera.viewportWidth = Gdx.graphics.getWidth();
     camera.viewportHeight = Gdx.graphics.getHeight();
     float r = CAMERA_DISTANCE;
@@ -159,29 +159,32 @@ public class OrbitalScene implements Scene {
     camera.far = 100f;
     camera.update();
 
-    Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-    Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+    // No depth test: the cloud is made only of translucent marks, so draw order is fine, and this
+    // avoids depth-write artefacts on the fading edges.
     shapes.setProjectionMatrix(camera.combined);
 
-    shapes.begin(ShapeType.Point);
+    // Draw each sample as a tiny 3D cross. Plain GL points are 1px on desktop and do not render at
+    // all on WebGL (the shader never sets the point size), so a cross is the robust choice.
+    float d = 0.045f;
+    shapes.begin(ShapeType.Line);
     for (int i = 0; i < count; i++) {
       if (positive[i]) {
         shapes.setColor(1f, 0.6f, 0.3f, 0.8f); // positive phase, warm
       } else {
         shapes.setColor(0.3f, 0.7f, 1f, 0.8f); // negative phase, cool
       }
-      shapes.point(px[i], py[i], pz[i]);
+      float x = px[i];
+      float y = py[i];
+      float z = pz[i];
+      shapes.line(x - d, y, z, x + d, y, z);
+      shapes.line(x, y - d, z, x, y + d, z);
+      shapes.line(x, y, z - d, x, y, z + d);
     }
-    shapes.end();
-
     // The nucleus.
-    shapes.begin(ShapeType.Line);
     shapes.setColor(1f, 1f, 1f, 1f);
     shapes.line(-0.15f, 0, 0, 0.15f, 0, 0);
     shapes.line(0, -0.15f, 0, 0, 0.15f, 0);
     shapes.line(0, 0, -0.15f, 0, 0, 0.15f);
     shapes.end();
-
-    Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
   }
 }

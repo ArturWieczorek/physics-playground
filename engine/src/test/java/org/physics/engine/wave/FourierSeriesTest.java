@@ -41,4 +41,16 @@ class FourierSeriesTest {
     FourierSeries wave = FourierSeries.squareWave(10);
     assertEquals(-wave.valueAt(0.7), wave.valueAt(-0.7), 1e-12);
   }
+
+  @Test
+  @DisplayName("the sawtooth uses every harmonic, alternating sign, first amplitude 2/pi")
+  void sawtoothHarmonics() {
+    var harmonics = FourierSeries.sawtooth(4).harmonics();
+    assertEquals(2.0 / Math.PI, harmonics.get(0).amplitude(), 1e-12);
+    assertEquals(1, harmonics.get(0).frequency());
+    assertEquals(2, harmonics.get(1).frequency()); // every harmonic, not just the odd ones
+    assertTrue(
+        harmonics.get(0).amplitude() > 0 && harmonics.get(1).amplitude() < 0,
+        "the sign should alternate between harmonics");
+  }
 }

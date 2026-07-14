@@ -34,8 +34,12 @@ public interface Scene {
     return List.of();
   }
 
-  /** Advances the simulation by {@code dt} seconds (the real time since the last frame). */
-  void update(float dt);
+  /**
+   * Advances the simulation by {@code dt} seconds (the real time since the last frame). Optional: a
+   * purely static scene (for example one that only orbits a fixed 3D surface) need not implement
+   * it.
+   */
+  default void update(float dt) {}
 
   /** Draws the current state. The projection is already set to world units. */
   void render(ShapeRenderer shapes);

@@ -14,8 +14,10 @@ class LorenzSystemTest {
     LorenzSystem s = new LorenzSystem(1, 1, 1);
     for (int i = 0; i < 20000; i++) {
       s.step(0.005);
+      // The classic attractor lives within roughly |x|,|y| < 30 and z in 0..55; these bounds are
+      // tight enough that wrong parameters or a broken integrator would break them.
       assertTrue(
-          Math.abs(s.x()) < 100 && Math.abs(s.y()) < 100 && s.z() > -10 && s.z() < 120,
+          Math.abs(s.x()) < 45 && Math.abs(s.y()) < 45 && s.z() > -5 && s.z() < 70,
           "should stay on the attractor, not diverge");
     }
   }

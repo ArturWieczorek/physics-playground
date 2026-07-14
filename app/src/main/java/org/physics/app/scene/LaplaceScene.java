@@ -40,6 +40,8 @@ public class LaplaceScene implements Scene {
   private PerspectiveCamera camera;
   private double azimuth = 0.8;
   private double elevation = 0.45;
+  private float[][] surface;
+  private boolean dirty = true;
 
   @Override
   public String title() {
@@ -69,6 +71,7 @@ public class LaplaceScene implements Scene {
     current = 0;
     azimuth = 0.8;
     elevation = 0.45;
+    dirty = true;
   }
 
   @Override
@@ -77,33 +80,43 @@ public class LaplaceScene implements Scene {
       current = (current + 1) % functions.length;
     } else if (keycode == Input.Keys.LEFT) {
       current = (current - 1 + functions.length) % functions.length;
+    } else {
+      return;
     }
+    dirty = true;
   }
 
-  @Override
-  public void update(float dt) {
+  // Camera orbiting lives here (not in update) so it keeps working even while the app is paused.
+  private void orbit() {
     if (Gdx.input.isTouched()) {
       azimuth -= Gdx.input.getDeltaX() * 0.01;
       elevation += Gdx.input.getDeltaY() * 0.01;
       elevation = Math.max(0.1, Math.min(1.4, elevation));
     } else {
-      azimuth += dt * 0.2;
+      azimuth += Gdx.graphics.getDeltaTime() * 0.2;
     }
   }
 
-  @Override
-  public void render(ShapeRenderer shapes) {
-    positionCamera();
-
+  // Sample the surface once, only when the signal changes, not every frame.
+  private void sampleSurface() {
     LaplaceFunction f = functions[current];
-    float[][] height = new float[GRID + 1][GRID + 1];
+    surface = new float[GRID + 1][GRID + 1];
     for (int i = 0; i <= GRID; i++) {
       double sigma = SIGMA_MIN + (SIGMA_MAX - SIGMA_MIN) * i / GRID;
       for (int j = 0; j <= GRID; j++) {
         double omega = OMEGA_MIN + (OMEGA_MAX - OMEGA_MIN) * j / GRID;
-        double m = f.magnitude(sigma, omega);
-        height[i][j] = (float) Math.min(HEIGHT_CAP, m); // clip the infinite spike
+        surface[i][j] = (float) Math.min(HEIGHT_CAP, f.magnitude(sigma, omega)); // clip the spike
       }
+    }
+    dirty = false;
+  }
+
+  @Override
+  public void render(ShapeRenderer shapes) {
+    orbit();
+    positionCamera();
+    if (dirty) {
+      sampleSurface();
     }
 
     Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -113,10 +126,10 @@ public class LaplaceScene implements Scene {
     for (int i = 0; i <= GRID; i++) {
       for (int j = 0; j <= GRID; j++) {
         if (i < GRID) {
-          drawEdge(shapes, i, j, i + 1, j, height);
+          drawEdge(shapes, i, j, i + 1, j, surface);
         }
         if (j < GRID) {
-          drawEdge(shapes, i, j, i, j + 1, height);
+          drawEdge(shapes, i, j, i, j + 1, surface);
         }
       }
     }

@@ -1,11 +1,11 @@
 package org.physics.app.scene;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import org.physics.engine.chaos.LorenzSystem;
 
@@ -27,7 +27,7 @@ public class LorenzScene implements Scene {
   private static final float CAMERA_DISTANCE = 13f;
 
   private LorenzSystem system;
-  private final List<float[]> trail = new ArrayList<>();
+  private final Deque<float[]> trail = new ArrayDeque<>();
   private PerspectiveCamera camera;
   private double azimuth = 0.7;
   private double elevation = 0.35;
@@ -65,51 +65,59 @@ public class LorenzScene implements Scene {
     elevation = 0.35;
   }
 
+  // Only the simulation lives in update, so pausing freezes the attractor. Camera orbit is in
+  // render (see orbit()), so you can still rotate a frozen attractor.
   @Override
   public void update(float dt) {
-    if (Gdx.input.isTouched()) {
-      azimuth -= Gdx.input.getDeltaX() * 0.01;
-      elevation += Gdx.input.getDeltaY() * 0.01;
-      elevation = Math.max(-1.4, Math.min(1.4, elevation));
-    } else {
-      azimuth += dt * 0.15;
-    }
-
     timeBudget += Math.min(dt, 0.05f);
     while (timeBudget >= STEP) {
       system.step(STEP);
       timeBudget -= STEP;
       // Map Lorenz coordinates into a centred world position.
-      trail.add(
+      trail.addLast(
           new float[] {
             (float) (system.x() * SCALE),
             (float) ((system.z() - 25) * SCALE),
             (float) (system.y() * SCALE)
           });
       if (trail.size() > TRAIL_LENGTH) {
-        trail.remove(0);
+        trail.removeFirst();
       }
+    }
+  }
+
+  private void orbit() {
+    if (Gdx.input.isTouched()) {
+      azimuth -= Gdx.input.getDeltaX() * 0.01;
+      elevation += Gdx.input.getDeltaY() * 0.01;
+      elevation = Math.max(-1.4, Math.min(1.4, elevation));
+    } else {
+      azimuth += Gdx.graphics.getDeltaTime() * 0.15;
     }
   }
 
   @Override
   public void render(ShapeRenderer shapes) {
+    orbit();
     positionCamera();
-    Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-    Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+    // Only a translucent trail is drawn, so no depth test is needed; draw order (oldest first) is
+    // already correct.
     shapes.setProjectionMatrix(camera.combined);
 
     shapes.begin(ShapeType.Line);
-    for (int i = 1; i < trail.size(); i++) {
-      float fade = i / (float) trail.size(); // brighter toward the newest point
-      // Colour shifts blue to pink around the wings, brightening at the head.
-      shapes.setColor(0.3f + 0.6f * fade, 0.4f * (1 - fade) + 0.2f, 0.7f + 0.3f * fade, fade);
-      float[] a = trail.get(i - 1);
-      float[] b = trail.get(i);
-      shapes.line(a[0], a[1], a[2], b[0], b[1], b[2]);
+    int size = trail.size();
+    int i = 0;
+    float[] prev = null;
+    for (float[] point : trail) {
+      if (prev != null) {
+        float fade = i / (float) size; // brighter toward the newest point
+        shapes.setColor(0.3f + 0.6f * fade, 0.4f * (1 - fade) + 0.2f, 0.7f + 0.3f * fade, fade);
+        shapes.line(prev[0], prev[1], prev[2], point[0], point[1], point[2]);
+      }
+      prev = point;
+      i++;
     }
     shapes.end();
-    Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
   }
 
   private void positionCamera() {

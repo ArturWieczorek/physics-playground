@@ -33,7 +33,11 @@ public final class Curves {
     return new Track(points);
   }
 
-  /** A smooth arc bowing {@code sag} below the straight line between the two points. */
+  /**
+   * A smooth arc that bows below the straight line between the two points. The control point is
+   * pulled down by {@code sag}; because a quadratic curve only reaches halfway to its control
+   * point, the deepest bow is about {@code sag / 2}.
+   */
   public static Track arc(Vector2 start, Vector2 end, double sag, int samples) {
     // A quadratic curve with a control point pulled down below the midpoint gives a clean bow.
     Vector2 control = new Vector2((start.x() + end.x()) / 2, (start.y() + end.y()) / 2 - sag);

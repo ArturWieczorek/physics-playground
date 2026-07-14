@@ -37,6 +37,9 @@ public class PauliScene implements Scene {
   private boolean antisymmetric = true; // electrons are fermions, so start here
   private double azimuth = 0.9;
   private double elevation = 0.6;
+  private float[][] surface;
+  private double surfaceMax;
+  private boolean dirty = true; // resample the surface only when the state changes, not every frame
 
   @Override
   public String title() {
@@ -68,42 +71,51 @@ public class PauliScene implements Scene {
     antisymmetric = true;
     azimuth = 0.9;
     elevation = 0.6;
+    dirty = true;
   }
 
   @Override
   public void keyPressed(int keycode) {
     if (keycode == Input.Keys.SPACE) {
       antisymmetric = !antisymmetric;
+      dirty = true;
     }
   }
 
-  @Override
-  public void update(float dt) {
+  // Camera orbiting lives here (not in update) so it keeps working even while the app is paused.
+  private void orbit() {
     if (Gdx.input.isTouched()) {
-      // Drag to orbit.
       azimuth -= Gdx.input.getDeltaX() * 0.01;
       elevation += Gdx.input.getDeltaY() * 0.01;
       elevation = Math.max(0.1, Math.min(1.4, elevation));
     } else {
-      azimuth += dt * 0.25; // gently spin when left alone
+      azimuth += Gdx.graphics.getDeltaTime() * 0.25; // gently spin when left alone
     }
   }
 
-  @Override
-  public void render(ShapeRenderer shapes) {
-    positionCamera();
-
-    // Sample the wavefunction on the grid, tracking the largest value so we can scale it.
-    float[][] height = new float[GRID + 1][GRID + 1];
-    double maxAbs = 1e-9;
+  // Sample the wavefunction on the grid once, tracking the largest value so we can scale it. Only
+  // recomputed when the state changes (space toggles boson/fermion), not every frame.
+  private void sampleSurface() {
+    surface = new float[GRID + 1][GRID + 1];
+    surfaceMax = 1e-9;
     for (int i = 0; i <= GRID; i++) {
       double x1 = -L + 2 * L * i / GRID;
       for (int j = 0; j <= GRID; j++) {
         double x2 = -L + 2 * L * j / GRID;
         double v = state.value(x1, x2, antisymmetric);
-        height[i][j] = (float) v;
-        maxAbs = Math.max(maxAbs, Math.abs(v));
+        surface[i][j] = (float) v;
+        surfaceMax = Math.max(surfaceMax, Math.abs(v));
       }
+    }
+    dirty = false;
+  }
+
+  @Override
+  public void render(ShapeRenderer shapes) {
+    orbit();
+    positionCamera();
+    if (dirty) {
+      sampleSurface();
     }
 
     Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -113,10 +125,10 @@ public class PauliScene implements Scene {
     for (int i = 0; i <= GRID; i++) {
       for (int j = 0; j <= GRID; j++) {
         if (i < GRID) {
-          drawEdge(shapes, i, j, i + 1, j, height, maxAbs);
+          drawEdge(shapes, i, j, i + 1, j, surface, surfaceMax);
         }
         if (j < GRID) {
-          drawEdge(shapes, i, j, i, j + 1, height, maxAbs);
+          drawEdge(shapes, i, j, i, j + 1, surface, surfaceMax);
         }
       }
     }
