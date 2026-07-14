@@ -17,6 +17,7 @@ import java.util.List;
 import org.physics.app.scene.ChargesScene;
 import org.physics.app.scene.ClothScene;
 import org.physics.app.scene.CollisionScene;
+import org.physics.app.scene.FluidScene;
 import org.physics.app.scene.GasScene;
 import org.physics.app.scene.MagnetismScene;
 import org.physics.app.scene.MolecularScene;
@@ -70,6 +71,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new MagnetismScene());
     scenes.add(new MolecularScene());
     scenes.add(new ClothScene());
+    scenes.add(new FluidScene());
     scenes.get(current).show();
   }
 
