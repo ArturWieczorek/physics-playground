@@ -30,6 +30,8 @@ public class ClothScene implements Scene {
   private Cloth cloth;
   private float timeBudget;
   private boolean cutMode;
+  private double windStrength;
+  private float windTime;
 
   private ClothPoint grabbed;
   private boolean grabbedWasPinned;
@@ -41,7 +43,14 @@ public class ClothScene implements Scene {
 
   @Override
   public String controls() {
-    return "space: " + (cutMode ? "[cut mode]" : "[grab mode]") + "   drag: pull or slash";
+    return "space: "
+        + (cutMode ? "[cut mode]" : "[grab mode]")
+        + "   drag: pull or slash   left/right: wind";
+  }
+
+  @Override
+  public java.util.List<String> readouts() {
+    return java.util.List.of("wind: " + Draw.num(windStrength, 1));
   }
 
   @Override
@@ -56,13 +65,19 @@ public class ClothScene implements Scene {
     cloth.pinTopRow();
     timeBudget = 0f;
     grabbed = null;
+    windStrength = 0;
+    windTime = 0f;
   }
 
   @Override
   public void update(float dt) {
     timeBudget += Math.min(dt, 0.05f);
     while (timeBudget >= FIXED_DT) {
-      cloth.step(GRAVITY, FIXED_DT, ITERATIONS);
+      windTime += FIXED_DT;
+      // Wind gusts: a horizontal push that swells and eases so the cloth billows rather than
+      // leaning at a fixed angle.
+      double gust = windStrength * (0.6 + 0.4 * Math.sin(windTime * 2.0));
+      cloth.step(GRAVITY.add(new Vector2(gust, 0)), FIXED_DT, ITERATIONS);
       timeBudget -= FIXED_DT;
     }
   }
@@ -71,6 +86,10 @@ public class ClothScene implements Scene {
   public void keyPressed(int keycode) {
     if (keycode == Input.Keys.SPACE) {
       cutMode = !cutMode;
+    } else if (keycode == Input.Keys.RIGHT) {
+      windStrength = Math.min(30, windStrength + 2);
+    } else if (keycode == Input.Keys.LEFT) {
+      windStrength = Math.max(-30, windStrength - 2);
     }
   }
 

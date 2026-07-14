@@ -40,6 +40,7 @@ public class GasScene implements Scene {
 
   private World world;
   private float timeBudget;
+  private double pistonX;
 
   @Override
   public String title() {
@@ -48,15 +49,20 @@ public class GasScene implements Scene {
 
   @Override
   public String controls() {
-    return "up/down: heat/cool";
+    return "up/down: heat/cool   drag: move the piston";
   }
 
   @Override
   public List<String> readouts() {
     double temperature = MaxwellBoltzmann.temperature(world.bodies());
+    double volume = (pistonX - BOX_LEFT) * (BOX_TOP - BOX_BOTTOM);
+    // Ideal-gas pressure P = N k T / V (k = 1). Shrink the volume with the piston and watch it
+    // rise: that is Boyle's law.
+    double pressure = PARTICLE_COUNT * temperature / volume;
     return List.of(
         "temperature: " + Draw.num(temperature, 2),
-        "mean speed: " + Draw.num(MaxwellBoltzmann.meanSpeed(temperature, MASS), 2));
+        "volume: " + Draw.num(volume, 1),
+        "pressure (ideal gas): " + Draw.num(pressure, 1));
   }
 
   @Override
@@ -67,8 +73,8 @@ public class GasScene implements Scene {
   @Override
   public void reset() {
     world = new World();
-    world.addConstraint(new ParticleCollisions(1.0));
-    world.addConstraint(new BoxBounds(BOX_LEFT, BOX_BOTTOM, BOX_RIGHT, BOX_TOP, 1.0));
+    pistonX = BOX_RIGHT;
+    rebuildConstraints();
 
     Random random = new Random(20260714L);
     for (int i = 0; i < PARTICLE_COUNT; i++) {
@@ -81,6 +87,28 @@ public class GasScene implements Scene {
       world.add(new Particle(new Vector2(x, y), velocity, MASS).radius(RADIUS));
     }
     timeBudget = 0f;
+  }
+
+  // Rebuilds the walls so the right wall (the piston) sits at its current position.
+  private void rebuildConstraints() {
+    world.clearConstraints();
+    world.addConstraint(new ParticleCollisions(1.0));
+    world.addConstraint(new BoxBounds(BOX_LEFT, BOX_BOTTOM, pistonX, BOX_TOP, 1.0));
+  }
+
+  @Override
+  public void pointerDown(float worldX, float worldY) {
+    movePiston(worldX);
+  }
+
+  @Override
+  public void pointerDrag(float worldX, float worldY) {
+    movePiston(worldX);
+  }
+
+  private void movePiston(double worldX) {
+    pistonX = Math.max(7.0, Math.min(BOX_RIGHT, worldX));
+    rebuildConstraints();
   }
 
   @Override
@@ -136,7 +164,10 @@ public class GasScene implements Scene {
 
     shapes.begin(ShapeType.Filled);
     shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
-    Draw.box(shapes, BOX_LEFT, BOX_BOTTOM, BOX_RIGHT, BOX_TOP, 0.06f);
+    Draw.box(shapes, BOX_LEFT, BOX_BOTTOM, pistonX, BOX_TOP, 0.06f);
+    // The piston: a solid bar on the right wall you can drag to change the volume.
+    shapes.setColor(0.8f, 0.6f, 0.3f, 1f);
+    shapes.rect((float) pistonX - 0.12f, (float) BOX_BOTTOM, 0.24f, (float) (BOX_TOP - BOX_BOTTOM));
     shapes.end();
 
     drawParticles(shapes, bodies, maxSpeed);

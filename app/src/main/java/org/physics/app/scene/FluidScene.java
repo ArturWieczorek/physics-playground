@@ -161,12 +161,15 @@ public class FluidScene implements Scene {
     shapes.begin(ShapeType.Filled);
     shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
     Draw.box(shapes, 0.5, 0.5, 15.5, 8.7, 0.06f);
+    // Draw each particle as a large translucent blob, roughly a smoothing-radius wide. Where
+    // particles crowd together the blobs overlap and merge into a continuous body of water, with a
+    // soft surface, instead of a stipple of separate dots.
+    float blob = (float) (H * 0.9);
     for (Particle body : bodies) {
       // Calm water is deep blue; fast-moving splashes brighten toward white.
       float speed = (float) Math.min(1.0, body.velocity().length() / 6.0);
-      shapes.setColor(0.2f + 0.6f * speed, 0.5f + 0.4f * speed, 0.95f, 1f);
-      shapes.circle(
-          (float) body.position().x(), (float) body.position().y(), (float) body.radius(), 12);
+      shapes.setColor(0.2f + 0.6f * speed, 0.5f + 0.4f * speed, 0.95f, 0.5f);
+      shapes.circle((float) body.position().x(), (float) body.position().y(), blob, 16);
     }
     shapes.end();
   }
