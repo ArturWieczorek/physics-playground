@@ -1,3 +1,5 @@
+import java.io.File
+
 // Web launcher. It compiles the whole application to JavaScript and WebGL using
 // TeaVM, through the gdx-teavm backend, so the same Java runs in a browser. The
 // output is copied into the top-level docs/ folder, which GitHub Pages serves.
@@ -35,6 +37,19 @@ tasks.register<JavaExec>("buildWeb") {
       from(layout.buildDirectory.dir("dist/webapp")) // put index.html at the docs/ root
       into(docs)
     }
-    java.io.File(docs, "CNAME").writeText(pagesDomain + "\n") // keep the custom domain across builds
+    File(docs, "CNAME").writeText(pagesDomain + "\n") // keep the custom domain across builds
+
+    // Add the physics atom favicon and link it from the generated page (both wiped by the build).
+    val favicon = File(docs, "favicon.svg")
+    favicon.writeText(project.file("favicon.svg").readText())
+    val indexFile = File(docs, "index.html")
+    var html = indexFile.readText()
+    if (!html.contains("favicon.svg")) {
+      html =
+          html.replaceFirst(
+              "</head>",
+              "    <link rel=\"icon\" type=\"image/svg+xml\" href=\"favicon.svg\">\n  </head>")
+      indexFile.writeText(html)
+    }
   }
 }
