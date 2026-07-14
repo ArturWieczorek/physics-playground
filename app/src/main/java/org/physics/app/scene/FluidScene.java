@@ -1,5 +1,6 @@
 package org.physics.app.scene;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ public class FluidScene implements Scene {
   private BoxBounds bounds;
   private float timeBudget;
   private Vector2 lastPointer;
+  private double viscosity;
+  private double stiffness;
 
   @Override
   public String title() {
@@ -46,12 +49,32 @@ public class FluidScene implements Scene {
 
   @Override
   public String controls() {
-    return "drag: stir and splash";
+    return "drag: stir and splash   up/down: viscosity   left/right: stiffness";
   }
 
   @Override
   public List<String> readouts() {
-    return List.of("particles: " + bodies.size());
+    return List.of(
+        "particles: " + bodies.size(),
+        "viscosity: " + Draw.num(viscosity, 1),
+        "stiffness: " + Draw.num(stiffness, 1));
+  }
+
+  @Override
+  public void keyPressed(int keycode) {
+    if (keycode == Input.Keys.UP) {
+      viscosity = Math.min(20, viscosity + 0.5);
+    } else if (keycode == Input.Keys.DOWN) {
+      viscosity = Math.max(0, viscosity - 0.5);
+    } else if (keycode == Input.Keys.RIGHT) {
+      stiffness = Math.min(30, stiffness + 1);
+    } else if (keycode == Input.Keys.LEFT) {
+      stiffness = Math.max(1, stiffness - 1);
+    } else {
+      return;
+    }
+    // Rebuild the solver with the new settings, keeping the tuned rest density.
+    sph = new Sph(H, MASS, sph.restDensity(), stiffness, viscosity);
   }
 
   @Override
@@ -62,7 +85,9 @@ public class FluidScene implements Scene {
   @Override
   public void reset() {
     bodies.clear();
-    sph = new Sph(H, MASS, 0.0, STIFFNESS, VISCOSITY);
+    viscosity = VISCOSITY;
+    stiffness = STIFFNESS;
+    sph = new Sph(H, MASS, 0.0, stiffness, viscosity);
     bounds = new BoxBounds(0.5, 0.5, 15.5, 8.7, 0.3);
 
     for (int col = 0; col < COLUMNS; col++) {

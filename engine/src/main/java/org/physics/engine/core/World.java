@@ -45,6 +45,16 @@ public class World {
     constraints.add(constraint);
   }
 
+  /** Removes all forces. Used by scenes that rebuild their forces when a parameter changes. */
+  public void clearForces() {
+    forces.clear();
+  }
+
+  /** Removes all constraints. */
+  public void clearConstraints() {
+    constraints.clear();
+  }
+
   /** The particles, as a read-only list. */
   public List<Particle> bodies() {
     return Collections.unmodifiableList(bodies);

@@ -1,7 +1,9 @@
 package org.physics.app.scene;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import java.util.List;
 import org.physics.engine.core.Particle;
 import org.physics.engine.core.World;
 import org.physics.engine.force.Spring;
@@ -38,6 +40,8 @@ public class SpringScene implements Scene {
   private Particle bob;
   private float timeBudget;
   private boolean holding;
+  private double stiffness;
+  private double damping;
 
   @Override
   public String title() {
@@ -46,7 +50,12 @@ public class SpringScene implements Scene {
 
   @Override
   public String controls() {
-    return "drag: pull the weight";
+    return "drag: pull the weight   up/down: stiffness   left/right: damping";
+  }
+
+  @Override
+  public List<String> readouts() {
+    return List.of("stiffness: " + Draw.num(stiffness, 0), "damping: " + Draw.num(damping, 1));
   }
 
   @Override
@@ -59,10 +68,34 @@ public class SpringScene implements Scene {
     world = new World();
     anchor = world.add(new Particle(ANCHOR_POSITION, Vector2.ZERO, 1.0).pin());
     bob = world.add(new Particle(BOB_START, Vector2.ZERO, BOB_MASS));
-    world.addForce(new UniformGravity(new Vector2(0, -9.81)));
-    world.addForce(new Spring(anchor, bob, REST_LENGTH, STIFFNESS, DAMPING));
+    stiffness = STIFFNESS;
+    damping = DAMPING;
+    rebuildForces();
     timeBudget = 0f;
     holding = false;
+  }
+
+  // Rebuilds the forces after a parameter changes, keeping the anchor and bob where they are.
+  private void rebuildForces() {
+    world.clearForces();
+    world.addForce(new UniformGravity(new Vector2(0, -9.81)));
+    world.addForce(new Spring(anchor, bob, REST_LENGTH, stiffness, damping));
+  }
+
+  @Override
+  public void keyPressed(int keycode) {
+    if (keycode == Input.Keys.UP) {
+      stiffness = Math.min(200, stiffness + 10);
+    } else if (keycode == Input.Keys.DOWN) {
+      stiffness = Math.max(10, stiffness - 10);
+    } else if (keycode == Input.Keys.RIGHT) {
+      damping = Math.min(6, damping + 0.2);
+    } else if (keycode == Input.Keys.LEFT) {
+      damping = Math.max(0, damping - 0.2);
+    } else {
+      return;
+    }
+    rebuildForces();
   }
 
   @Override

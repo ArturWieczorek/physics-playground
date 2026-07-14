@@ -55,6 +55,7 @@ public class PlaygroundApp extends ApplicationAdapter {
   private int current;
   private boolean paused;
   private boolean stepOnce;
+  private float timeScale = 1f;
 
   private boolean pointerWasDown;
   private final Vector3 pointer = new Vector3();
@@ -89,7 +90,7 @@ public class PlaygroundApp extends ApplicationAdapter {
 
     Scene scene = scenes.get(current);
     if (!paused) {
-      scene.update(Gdx.graphics.getDeltaTime());
+      scene.update(Gdx.graphics.getDeltaTime() * timeScale);
     } else if (stepOnce) {
       scene.update(1f / 60f); // advance a single frame while paused
       stepOnce = false;
@@ -118,6 +119,12 @@ public class PlaygroundApp extends ApplicationAdapter {
     }
     if (Gdx.input.isKeyJustPressed(Input.Keys.PERIOD)) {
       stepOnce = true; // single-step the next frame (most useful while paused)
+    }
+    if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT_BRACKET)) {
+      timeScale = Math.max(0.1f, timeScale - 0.1f); // slow motion
+    }
+    if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT_BRACKET)) {
+      timeScale = Math.min(3f, timeScale + 0.1f); // speed up
     }
     // Forward the keys scenes use for their own controls (heating a gas, changing a field, ...).
     for (int key :
@@ -181,7 +188,12 @@ public class PlaygroundApp extends ApplicationAdapter {
 
     font.getData().setScale(2.0f * ui);
     font.setColor(0.96f, 0.97f, 1f, 1f);
-    String title = scene.title() + (paused ? "   [paused]" : "");
+    String title = scene.title();
+    if (paused) {
+      title += "   [paused]";
+    } else if (Math.abs(timeScale - 1f) > 0.01f) {
+      title += "   [speed x" + (Math.round(timeScale * 10) / 10.0) + "]";
+    }
     font.draw(batch, title, 16f * ui, h - 14f * ui);
 
     font.getData().setScale(1.3f * ui);
@@ -201,7 +213,7 @@ public class PlaygroundApp extends ApplicationAdapter {
 
   private String controlsLine(Scene scene) {
     String sceneControls = scene.controls();
-    String shared = "1-" + scenes.size() + " scenes   R reset   P pause";
+    String shared = "1-" + scenes.size() + " scenes   R reset   P pause   [ ] speed";
     return sceneControls.isEmpty() ? shared : sceneControls + "      " + shared;
   }
 

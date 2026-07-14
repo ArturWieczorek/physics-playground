@@ -16,19 +16,23 @@ import org.physics.engine.math.Vector2;
  * moving they keep going, bouncing off the walls, and you can watch momentum pass from ball to
  * ball.
  *
- * <p>Click anywhere to fire a fresh ball from the left toward that point; press R to rack them up
- * again.
+ * <p>Drag from the white cue ball to aim: a line shows the shot, and the further you pull the
+ * harder it strikes. Release to break the rack. Press R to set it up again.
  */
 public class CollisionScene implements Scene {
 
   private static final float FIXED_DT = 1f / 120f;
   private static final double BALL_RADIUS = 0.3;
   private static final double BALL_MASS = 1.0;
+  private static final double MAX_SHOT_SPEED = 16.0;
 
   private World world;
   private final List<Particle> balls = new ArrayList<>();
   private Particle cue;
   private float timeBudget;
+
+  private boolean aiming;
+  private Vector2 aimPoint = Vector2.ZERO;
 
   @Override
   public String title() {
@@ -37,7 +41,7 @@ public class CollisionScene implements Scene {
 
   @Override
   public String controls() {
-    return "click: fire the cue ball";
+    return "drag from the cue ball to aim, release to shoot";
   }
 
   @Override
@@ -81,9 +85,10 @@ public class CollisionScene implements Scene {
       }
     }
 
-    // The cue ball on the left, already moving toward the rack.
-    cue = addBall(new Vector2(2.5, 4.5), new Vector2(9, 0));
+    // The cue ball on the left, waiting for you to take the shot.
+    cue = addBall(new Vector2(3.5, 4.5), Vector2.ZERO);
     timeBudget = 0f;
+    aiming = false;
   }
 
   private Particle addBall(Vector2 position, Vector2 velocity) {
@@ -103,29 +108,56 @@ public class CollisionScene implements Scene {
 
   @Override
   public void pointerDown(float worldX, float worldY) {
-    // Fire the cue ball from the left edge toward where you clicked.
-    Vector2 start = new Vector2(1.0, worldY);
-    Vector2 aim = new Vector2(worldX, worldY).subtract(start);
-    if (aim.lengthSquared() > 0) {
-      cue.setPosition(start);
-      cue.setVelocity(aim.normalized().scale(9));
+    aiming = true;
+    aimPoint = new Vector2(worldX, worldY);
+  }
+
+  @Override
+  public void pointerDrag(float worldX, float worldY) {
+    if (aiming) {
+      aimPoint = new Vector2(worldX, worldY);
     }
+  }
+
+  @Override
+  public void pointerUp() {
+    if (!aiming) {
+      return;
+    }
+    aiming = false;
+    // Shoot the cue toward where you released; the further you dragged, the faster it goes.
+    Vector2 shot = aimPoint.subtract(cue.position()).scale(2.2);
+    double speed = shot.length();
+    if (speed > MAX_SHOT_SPEED) {
+      shot = shot.scale(MAX_SHOT_SPEED / speed);
+    }
+    cue.setVelocity(shot);
   }
 
   @Override
   public void render(ShapeRenderer shapes) {
     shapes.begin(ShapeType.Filled);
-    // The walls the balls bounce off.
-    shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
-    Draw.box(shapes, 0.05, 0.05, 15.95, 8.95, 0.1f);
+    // Green felt, then the cushioned rails the balls bounce off.
+    shapes.setColor(0.09f, 0.28f, 0.18f, 1f);
+    shapes.rect(0.1f, 0.1f, 15.8f, 8.8f);
+    shapes.setColor(0.32f, 0.2f, 0.12f, 1f);
+    Draw.box(shapes, 0.1, 0.1, 15.9, 8.9, 0.2f);
+
     for (Particle ball : balls) {
       if (ball == cue) {
-        shapes.setColor(0.95f, 0.95f, 0.98f, 1f); // cue ball, white
+        shapes.setColor(0.97f, 0.97f, 0.99f, 1f); // cue ball, white
       } else {
         shapes.setColor(0.25f, 0.6f, 0.95f, 1f); // the rack, blue
       }
       shapes.circle(
           (float) ball.position().x(), (float) ball.position().y(), (float) ball.radius(), 28);
+    }
+
+    // The aim line while you are lining up a shot.
+    if (aiming) {
+      shapes.setColor(1f, 1f, 1f, 0.7f);
+      Draw.line(shapes, cue.position().x(), cue.position().y(), aimPoint.x(), aimPoint.y(), 0.05f);
+      shapes.circle((float) aimPoint.x(), (float) aimPoint.y(), 0.12f, 12);
     }
     shapes.end();
   }

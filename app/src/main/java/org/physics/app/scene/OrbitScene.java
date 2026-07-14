@@ -1,5 +1,6 @@
 package org.physics.app.scene;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import java.util.ArrayList;
@@ -42,6 +43,11 @@ public class OrbitScene implements Scene {
 
   private float timeBudget;
   private int colorCursor;
+  private double gravityConstant;
+
+  private boolean aiming;
+  private Vector2 aimStart = Vector2.ZERO;
+  private Vector2 aimCurrent = Vector2.ZERO;
 
   @Override
   public String title() {
@@ -50,12 +56,13 @@ public class OrbitScene implements Scene {
 
   @Override
   public String controls() {
-    return "click: add a planet";
+    return "click: circular orbit   drag: slingshot launch   up/down: gravity";
   }
 
   @Override
   public java.util.List<String> readouts() {
-    return java.util.List.of("planets: " + planets.size());
+    return java.util.List.of(
+        "planets: " + planets.size(), "gravity G: " + Draw.num(gravityConstant, 1));
   }
 
   @Override
@@ -69,7 +76,8 @@ public class OrbitScene implements Scene {
     planets.clear();
     colorCursor = 0;
     star = world.add(new Particle(STAR_POSITION, Vector2.ZERO, STAR_MASS).pin());
-    world.addForce(new Gravitation(G, SOFTENING));
+    gravityConstant = G;
+    world.addForce(new Gravitation(gravityConstant, SOFTENING));
 
     addPlanetAt(new Vector2(11, 4.5));
     addPlanetAt(new Vector2(8, 8.0));
@@ -83,15 +91,30 @@ public class OrbitScene implements Scene {
     if (radius < 0.5) {
       return; // too close to the star to make a sensible orbit
     }
-    double speed = Math.sqrt(G * STAR_MASS / radius);
+    double speed = Math.sqrt(gravityConstant * STAR_MASS / radius);
     // Velocity perpendicular to the line to the star gives a circular orbit.
     Vector2 direction = new Vector2(-toStar.y(), toStar.x()).normalized();
-    Vector2 velocity = direction.scale(speed);
+    addPlanet(position, direction.scale(speed));
+  }
 
+  private void addPlanet(Vector2 position, Vector2 velocity) {
     Particle planet = world.add(new Particle(position, velocity, 1.0).radius(0.18));
     float[] color = PALETTE[colorCursor % PALETTE.length];
     colorCursor++;
     planets.add(new OrbitBody(planet, color));
+  }
+
+  @Override
+  public void keyPressed(int keycode) {
+    if (keycode == Input.Keys.UP) {
+      gravityConstant = Math.min(1000, gravityConstant + 20);
+    } else if (keycode == Input.Keys.DOWN) {
+      gravityConstant = Math.max(20, gravityConstant - 20);
+    } else {
+      return;
+    }
+    world.clearForces();
+    world.addForce(new Gravitation(gravityConstant, SOFTENING));
   }
 
   @Override
@@ -108,7 +131,31 @@ public class OrbitScene implements Scene {
 
   @Override
   public void pointerDown(float worldX, float worldY) {
-    addPlanetAt(new Vector2(worldX, worldY));
+    aiming = true;
+    aimStart = new Vector2(worldX, worldY);
+    aimCurrent = aimStart;
+  }
+
+  @Override
+  public void pointerDrag(float worldX, float worldY) {
+    if (aiming) {
+      aimCurrent = new Vector2(worldX, worldY);
+    }
+  }
+
+  @Override
+  public void pointerUp() {
+    if (!aiming) {
+      return;
+    }
+    aiming = false;
+    double drag = aimStart.distanceTo(aimCurrent);
+    if (drag < 0.4) {
+      addPlanetAt(aimStart); // a tap drops a planet in a clean circular orbit
+    } else {
+      // A drag is a slingshot: pull back from the launch point and release to fling it.
+      addPlanet(aimStart, aimStart.subtract(aimCurrent).scale(3.0));
+    }
   }
 
   @Override
@@ -136,6 +183,12 @@ public class OrbitScene implements Scene {
       shapes.setColor(planet.color[0], planet.color[1], planet.color[2], 1f);
       Vector2 p = planet.particle.position();
       shapes.circle((float) p.x(), (float) p.y(), (float) planet.particle.radius(), 20);
+    }
+    // The slingshot aim line while dragging.
+    if (aiming) {
+      shapes.setColor(1f, 1f, 1f, 0.7f);
+      Draw.line(shapes, aimStart.x(), aimStart.y(), aimCurrent.x(), aimCurrent.y(), 0.04f);
+      shapes.circle((float) aimStart.x(), (float) aimStart.y(), 0.12f, 12);
     }
     shapes.end();
   }

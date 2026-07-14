@@ -1,5 +1,6 @@
 package org.physics.app.scene;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class ChargesScene implements Scene {
   private final List<Particle> testCharges = new ArrayList<>();
   private float timeBudget;
   private double nextSign = 1.0;
+  private double sourceStrength;
 
   @Override
   public String title() {
@@ -42,12 +44,28 @@ public class ChargesScene implements Scene {
 
   @Override
   public String controls() {
-    return "click: add a + / - charge";
+    return "click: add a + / - charge   up/down: charge strength";
   }
 
   @Override
   public List<String> readouts() {
-    return List.of("source charges: " + sources.size());
+    return List.of(
+        "source charges: " + sources.size(), "charge strength: " + Draw.num(sourceStrength, 1));
+  }
+
+  @Override
+  public void keyPressed(int keycode) {
+    if (keycode == Input.Keys.UP) {
+      sourceStrength = Math.min(20, sourceStrength + 1);
+    } else if (keycode == Input.Keys.DOWN) {
+      sourceStrength = Math.max(1, sourceStrength - 1);
+    } else {
+      return;
+    }
+    // Reapply the new strength to every existing source, keeping each one's sign.
+    for (Particle source : sources) {
+      source.charge(Math.signum(source.charge()) * sourceStrength);
+    }
   }
 
   @Override
@@ -61,11 +79,12 @@ public class ChargesScene implements Scene {
     sources.clear();
     testCharges.clear();
     nextSign = 1.0;
+    sourceStrength = SOURCE_CHARGE;
     world.addForce(new Coulomb(K, SOFTENING));
     world.addConstraint(new BoxBounds(0.2, 0.2, 15.8, 8.8, 0.3));
 
-    addSource(new Vector2(10.5, 4.5), SOURCE_CHARGE);
-    addSource(new Vector2(5.5, 4.5), -SOURCE_CHARGE);
+    addSource(new Vector2(10.5, 4.5), sourceStrength);
+    addSource(new Vector2(5.5, 4.5), -sourceStrength);
 
     Random random = new Random(99);
     for (int i = 0; i < 16; i++) {
@@ -95,7 +114,7 @@ public class ChargesScene implements Scene {
 
   @Override
   public void pointerDown(float worldX, float worldY) {
-    addSource(new Vector2(worldX, worldY), SOURCE_CHARGE * nextSign);
+    addSource(new Vector2(worldX, worldY), sourceStrength * nextSign);
     nextSign = -nextSign; // alternate the sign of the next placed charge
   }
 
