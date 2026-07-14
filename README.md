@@ -76,12 +76,44 @@ and see exactly the code as it stood at that point.
 Requirements: Java 21 or newer. Everything else is fetched by the build.
 
 ```
-./gradlew desktop:run        # open the native app
+./gradlew desktop:run        # open the native app in a window
 ./gradlew test               # run all the physics tests
 ./gradlew spotlessApply       # format the code
 ```
 
-The browser build and how to publish it are covered in ch14.
+Switch scenes with the number keys, reset with R, and click or drag to interact. Each scene's
+controls are described in its chapter.
+
+### A packaged desktop app
+
+```
+./gradlew desktop:shadowJar
+java -jar desktop/build/libs/physics-playground.jar
+```
+
+### The browser build (WebGL)
+
+The whole app compiles to JavaScript and WebGL with TeaVM, so it runs in a browser with no
+install:
+
+```
+./gradlew web:buildWeb        # compiles to JS/WebGL and writes the result into docs/
+```
+
+To try it locally, serve the folder and open it:
+
+```
+npx http-server docs          # then open the printed http://localhost:... address
+```
+
+### Publishing to GitHub Pages
+
+The `docs/` folder is a complete static site. In the repository settings, under Pages, choose
+"Deploy from a branch", pick the `main` branch and the `/docs` folder, and save. The playground
+will be live at your GitHub Pages URL a minute later. Re-run `./gradlew web:buildWeb` and commit
+`docs/` whenever you want to update it.
+
+The details of the browser build and packaging are covered in ch14.
 
 ## Licence
 

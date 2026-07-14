@@ -6,3 +6,4 @@ include("engine")
 // The visible application and its launchers.
 include("app")
 include("desktop")
+include("web")
