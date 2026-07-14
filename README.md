@@ -30,6 +30,7 @@ A single app with a menu of scenes, each one a small experiment:
 - Rotatable 3D electron-orbital clouds (s, p, d) built from the hydrogen wavefunctions
 - The Laplace transform as a 3D surface, its poles rising as spikes over the complex plane
 - A 3D landscape with gradient arrows pointing uphill, perpendicular to its contours
+- The double-slit experiment: waves through two slits painting fringes on a screen
 
 ## How it is organised
 
@@ -84,6 +85,7 @@ and see exactly the code as it stood at that point.
 | ch19 | Electron orbitals: probability clouds (3D) |
 | ch20 | The Laplace transform and its poles (3D) |
 | ch21 | Gradients and partial derivatives (3D) |
+| ch22 | The double-slit experiment |
 
 ## Running it
 

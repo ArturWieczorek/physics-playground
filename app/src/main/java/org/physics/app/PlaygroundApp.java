@@ -25,6 +25,7 @@ import org.physics.app.scene.DoublePendulumScene;
 import org.physics.app.scene.FluidScene;
 import org.physics.app.scene.GasScene;
 import org.physics.app.scene.GradientScene;
+import org.physics.app.scene.InterferenceScene;
 import org.physics.app.scene.LaplaceScene;
 import org.physics.app.scene.LightScene;
 import org.physics.app.scene.MagnetismScene;
@@ -95,6 +96,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new OrbitalScene());
     scenes.add(new LaplaceScene());
     scenes.add(new GradientScene());
+    scenes.add(new InterferenceScene());
     scenes.get(current).show();
   }
 
