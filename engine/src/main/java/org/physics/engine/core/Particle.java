@@ -31,6 +31,10 @@ public class Particle {
   // radius so two particles can touch. Defaults to something small.
   private double radius = 0.2;
 
+  // Electric charge (ch09). Positive, negative, or zero. Only the electric forces care about it;
+  // gravity and springs ignore it.
+  private double charge = 0.0;
+
   public Particle(Vector2 position, Vector2 velocity, double mass) {
     if (mass <= 0) {
       throw new IllegalArgumentException("mass must be positive: " + mass);
@@ -82,6 +86,16 @@ public class Particle {
    */
   public double inverseMass() {
     return pinned ? 0.0 : 1.0 / mass;
+  }
+
+  public double charge() {
+    return charge;
+  }
+
+  /** Sets the electric charge and returns the particle, for easy chaining when building a scene. */
+  public Particle charge(double charge) {
+    this.charge = charge;
+    return this;
   }
 
   public boolean isPinned() {
