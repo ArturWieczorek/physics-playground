@@ -65,6 +65,7 @@ public class PlaygroundApp extends ApplicationAdapter {
   private final Matrix4 hudMatrix = new Matrix4();
 
   private final List<Scene> scenes = new ArrayList<>();
+  private final List<String> categories = new ArrayList<>();
   private int current;
   private boolean paused;
   private boolean stepOnce;
@@ -85,28 +86,29 @@ public class PlaygroundApp extends ApplicationAdapter {
     font.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
     font.setUseIntegerPositions(false);
 
-    scenes.add(new SpringScene());
-    scenes.add(new CollisionScene());
-    scenes.add(new GasScene());
-    scenes.add(new OrbitScene());
-    scenes.add(new ChargesScene());
-    scenes.add(new MagnetismScene());
-    scenes.add(new MolecularScene());
-    scenes.add(new ClothScene());
-    scenes.add(new FluidScene());
-    scenes.add(new BrachistochroneScene());
-    scenes.add(new DoublePendulumScene());
-    scenes.add(new LightScene());
-    scenes.add(new PauliScene());
-    scenes.add(new OrbitalScene());
-    scenes.add(new LaplaceScene());
-    scenes.add(new GradientScene());
-    scenes.add(new InterferenceScene());
-    scenes.add(new FourierScene());
-    scenes.add(new LorenzScene());
-    scenes.add(new PendulumWaveScene());
-    scenes.add(new CoupledSpringsScene());
-    scenes.add(new ResonanceScene());
+    // Scenes are grouped by the area of physics they belong to.
+    add("Mechanics", new SpringScene());
+    add("Mechanics", new CollisionScene());
+    add("Mechanics", new OrbitScene());
+    add("Mechanics", new CoupledSpringsScene());
+    add("Mechanics", new ResonanceScene());
+    add("Mechanics", new PendulumWaveScene());
+    add("Mechanics", new BrachistochroneScene());
+    add("Chaos", new DoublePendulumScene());
+    add("Chaos", new LorenzScene());
+    add("Thermodynamics", new GasScene());
+    add("Thermodynamics", new MolecularScene());
+    add("Electromagnetism", new ChargesScene());
+    add("Electromagnetism", new MagnetismScene());
+    add("Electromagnetism", new LightScene());
+    add("Waves and optics", new InterferenceScene());
+    add("Waves and optics", new FourierScene());
+    add("Soft bodies and fluids", new ClothScene());
+    add("Soft bodies and fluids", new FluidScene());
+    add("Quantum", new PauliScene());
+    add("Quantum", new OrbitalScene());
+    add("Maths", new LaplaceScene());
+    add("Maths", new GradientScene());
     scenes.get(current).show();
   }
 
@@ -184,6 +186,11 @@ public class PlaygroundApp extends ApplicationAdapter {
     }
   }
 
+  private void add(String category, Scene scene) {
+    categories.add(category);
+    scenes.add(scene);
+  }
+
   private void switchTo(int index) {
     if (index == current) {
       return;
@@ -221,7 +228,7 @@ public class PlaygroundApp extends ApplicationAdapter {
 
     font.getData().setScale(2.0f * ui);
     font.setColor(0.96f, 0.97f, 1f, 1f);
-    String title = scene.title();
+    String title = categories.get(current) + " - " + scene.title();
     if (paused) {
       title += "   [paused]";
     } else if (Math.abs(timeScale - 1f) > 0.01f) {
