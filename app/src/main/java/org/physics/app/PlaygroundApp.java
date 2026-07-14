@@ -18,6 +18,7 @@ import org.physics.app.scene.ChargesScene;
 import org.physics.app.scene.CollisionScene;
 import org.physics.app.scene.GasScene;
 import org.physics.app.scene.MagnetismScene;
+import org.physics.app.scene.MolecularScene;
 import org.physics.app.scene.OrbitScene;
 import org.physics.app.scene.Scene;
 import org.physics.app.scene.SpringScene;
@@ -66,6 +67,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new OrbitScene());
     scenes.add(new ChargesScene());
     scenes.add(new MagnetismScene());
+    scenes.add(new MolecularScene());
     scenes.get(current).show();
   }
 
