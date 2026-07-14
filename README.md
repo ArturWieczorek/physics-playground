@@ -33,6 +33,7 @@ A single app with a menu of scenes, each one a small experiment:
 - The double-slit experiment: waves through two slits painting fringes on a screen
 - Fourier series drawn as spinning circles that build a square wave
 - The Lorenz attractor, the butterfly-shaped emblem of chaos, drawn in 3D
+- A pendulum wave: a row of pendulums rippling in and out of sync
 
 ## How it is organised
 
@@ -90,6 +91,7 @@ and see exactly the code as it stood at that point.
 | ch22 | The double-slit experiment |
 | ch23 | Fourier series: drawing waves with circles |
 | ch24 | The Lorenz attractor (3D) |
+| ch25 | The pendulum wave |
 
 ## Running it
 

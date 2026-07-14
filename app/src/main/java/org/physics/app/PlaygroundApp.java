@@ -35,6 +35,7 @@ import org.physics.app.scene.MolecularScene;
 import org.physics.app.scene.OrbitScene;
 import org.physics.app.scene.OrbitalScene;
 import org.physics.app.scene.PauliScene;
+import org.physics.app.scene.PendulumWaveScene;
 import org.physics.app.scene.Scene;
 import org.physics.app.scene.SpringScene;
 
@@ -101,6 +102,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new InterferenceScene());
     scenes.add(new FourierScene());
     scenes.add(new LorenzScene());
+    scenes.add(new PendulumWaveScene());
     scenes.get(current).show();
   }
 
