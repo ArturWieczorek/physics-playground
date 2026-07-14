@@ -23,6 +23,7 @@ import org.physics.app.scene.ClothScene;
 import org.physics.app.scene.CollisionScene;
 import org.physics.app.scene.DoublePendulumScene;
 import org.physics.app.scene.FluidScene;
+import org.physics.app.scene.FourierScene;
 import org.physics.app.scene.GasScene;
 import org.physics.app.scene.GradientScene;
 import org.physics.app.scene.InterferenceScene;
@@ -97,6 +98,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new LaplaceScene());
     scenes.add(new GradientScene());
     scenes.add(new InterferenceScene());
+    scenes.add(new FourierScene());
     scenes.get(current).show();
   }
 
