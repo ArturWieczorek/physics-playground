@@ -36,7 +36,12 @@ public class ClothScene implements Scene {
 
   @Override
   public String title() {
-    return "Cloth (" + (cutMode ? "cut" : "grab") + " mode, space to switch)";
+    return "Cloth: tearable Verlet sheet";
+  }
+
+  @Override
+  public String controls() {
+    return "space: " + (cutMode ? "[cut mode]" : "[grab mode]") + "   drag: pull or slash";
   }
 
   @Override
@@ -109,7 +114,7 @@ public class ClothScene implements Scene {
 
   @Override
   public void render(ShapeRenderer shapes) {
-    shapes.begin(ShapeType.Line);
+    shapes.begin(ShapeType.Filled);
     for (Stick stick : cloth.sticks()) {
       if (stick.isBroken()) {
         continue;
@@ -120,11 +125,11 @@ public class ClothScene implements Scene {
       double strain = Math.min(1.0, (a.distanceTo(b) / stick.restLength() - 1.0) * 2.0);
       strain = Math.max(0.0, strain);
       shapes.setColor(
-          (float) (0.4 + 0.6 * strain),
-          (float) (0.7 - 0.4 * strain),
-          (float) (0.9 - 0.7 * strain),
+          (float) (0.45 + 0.55 * strain),
+          (float) (0.75 - 0.45 * strain),
+          (float) (0.95 - 0.75 * strain),
           1f);
-      shapes.line((float) a.x(), (float) a.y(), (float) b.x(), (float) b.y());
+      Draw.line(shapes, a.x(), a.y(), b.x(), b.y(), 0.03f);
     }
     shapes.end();
   }

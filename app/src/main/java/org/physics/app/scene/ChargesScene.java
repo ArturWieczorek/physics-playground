@@ -41,6 +41,16 @@ public class ChargesScene implements Scene {
   }
 
   @Override
+  public String controls() {
+    return "click: add a + / - charge";
+  }
+
+  @Override
+  public List<String> readouts() {
+    return List.of("source charges: " + sources.size());
+  }
+
+  @Override
   public void show() {
     reset();
   }
@@ -117,7 +127,15 @@ public class ChargesScene implements Scene {
   }
 
   private void drawFieldArrows(ShapeRenderer shapes) {
-    shapes.begin(ShapeType.Line);
+    shapes.begin(ShapeType.Filled);
+    // The walls that bound the test charges.
+    shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
+    Draw.box(shapes, 0.2, 0.2, 15.8, 8.8, 0.06f);
+
+    double shaft = 0.5;
+    double head = 0.16;
+    double cos = Math.cos(Math.toRadians(32));
+    double sin = Math.sin(Math.toRadians(32));
     for (double x = 0.75; x < 16; x += 1.0) {
       for (double y = 0.75; y < 9; y += 1.0) {
         Vector2 point = new Vector2(x, y);
@@ -127,12 +145,23 @@ public class ChargesScene implements Scene {
           continue;
         }
         Vector2 direction = field.scale(1.0 / magnitude);
-        // Brighter where the field is stronger, dimmer far away.
-        float intensity = (float) Math.min(1.0, 0.25 + magnitude / 6.0);
-        shapes.setColor(0.45f * intensity, 0.7f * intensity, 0.55f * intensity, 1f);
-        float x2 = (float) (x + direction.x() * 0.55);
-        float y2 = (float) (y + direction.y() * 0.55);
-        shapes.line((float) x, (float) y, x2, y2);
+        // Brighter where the field is stronger, but never so dim it disappears.
+        float intensity = (float) Math.min(1.0, 0.4 + magnitude / 6.0);
+        shapes.setColor(0.5f * intensity, 0.8f * intensity, 0.6f * intensity, 1f);
+
+        double tipX = x + direction.x() * shaft;
+        double tipY = y + direction.y() * shaft;
+        Draw.line(shapes, x, y, tipX, tipY, 0.035f);
+
+        // Two short strokes back from the tip make an arrowhead, so direction is clear.
+        double bx = -direction.x();
+        double by = -direction.y();
+        double h1x = bx * cos - by * sin;
+        double h1y = bx * sin + by * cos;
+        double h2x = bx * cos + by * sin;
+        double h2y = -bx * sin + by * cos;
+        Draw.line(shapes, tipX, tipY, tipX + h1x * head, tipY + h1y * head, 0.035f);
+        Draw.line(shapes, tipX, tipY, tipX + h2x * head, tipY + h2y * head, 0.035f);
       }
     }
     shapes.end();

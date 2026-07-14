@@ -17,6 +17,7 @@ public class TeaVMLauncher {
     TeaApplicationConfiguration config = new TeaApplicationConfiguration("canvas");
     config.width = 0;
     config.height = 0;
+    config.antialiasing = true; // ask the browser for a smoothed WebGL canvas
     new TeaApplication(new PlaygroundApp(), config);
   }
 }

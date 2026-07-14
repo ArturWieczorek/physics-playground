@@ -45,6 +45,16 @@ public class FluidScene implements Scene {
   }
 
   @Override
+  public String controls() {
+    return "drag: stir and splash";
+  }
+
+  @Override
+  public List<String> readouts() {
+    return List.of("particles: " + bodies.size());
+  }
+
+  @Override
   public void show() {
     reset();
   }
@@ -124,6 +134,8 @@ public class FluidScene implements Scene {
   @Override
   public void render(ShapeRenderer shapes) {
     shapes.begin(ShapeType.Filled);
+    shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
+    Draw.box(shapes, 0.5, 0.5, 15.5, 8.7, 0.06f);
     for (Particle body : bodies) {
       // Calm water is deep blue; fast-moving splashes brighten toward white.
       float speed = (float) Math.min(1.0, body.velocity().length() / 6.0);

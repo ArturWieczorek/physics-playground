@@ -3,11 +3,13 @@ package org.physics.app.scene;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import java.util.List;
 import java.util.Random;
 import org.physics.engine.collide.BoxBounds;
 import org.physics.engine.core.Particle;
 import org.physics.engine.core.World;
 import org.physics.engine.force.LennardJones;
+import org.physics.engine.gas.MaxwellBoltzmann;
 import org.physics.engine.math.Vector2;
 
 /**
@@ -36,6 +38,25 @@ public class MolecularScene implements Scene {
   @Override
   public String title() {
     return "Molecular dynamics: melting a crystal";
+  }
+
+  @Override
+  public String controls() {
+    return "up/down: heat/cool";
+  }
+
+  @Override
+  public List<String> readouts() {
+    double temperature = MaxwellBoltzmann.temperature(world.bodies());
+    String state;
+    if (temperature < 0.3) {
+      state = "solid";
+    } else if (temperature < 0.9) {
+      state = "liquid";
+    } else {
+      state = "gas";
+    }
+    return List.of("temperature: " + Draw.num(temperature, 2), "state: " + state);
   }
 
   @Override
@@ -95,6 +116,8 @@ public class MolecularScene implements Scene {
   @Override
   public void render(ShapeRenderer shapes) {
     shapes.begin(ShapeType.Filled);
+    shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
+    Draw.box(shapes, 0.3, 0.3, 15.7, 8.7, 0.06f);
     for (Particle atom : world.bodies()) {
       // Colour by speed: cool blue when frozen, hot orange when the crystal melts.
       float heat = (float) Math.min(1.0, atom.velocity().length() / 2.0);

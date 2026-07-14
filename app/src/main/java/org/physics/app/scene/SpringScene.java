@@ -45,6 +45,11 @@ public class SpringScene implements Scene {
   }
 
   @Override
+  public String controls() {
+    return "drag: pull the weight";
+  }
+
+  @Override
   public void show() {
     reset();
   }
@@ -101,13 +106,10 @@ public class SpringScene implements Scene {
     Vector2 a = anchor.position();
     Vector2 b = bob.position();
 
-    // The spring, drawn as a simple line between the two ends.
-    shapes.begin(ShapeType.Line);
-    shapes.setColor(0.55f, 0.6f, 0.7f, 1f);
-    shapes.line((float) a.x(), (float) a.y(), (float) b.x(), (float) b.y());
-    shapes.end();
-
     shapes.begin(ShapeType.Filled);
+    // The spring, drawn as a thick line between the two ends.
+    shapes.setColor(0.6f, 0.66f, 0.78f, 1f);
+    Draw.line(shapes, a.x(), a.y(), b.x(), b.y(), 0.05f);
     // The fixed anchor, a small pale block.
     shapes.setColor(0.8f, 0.82f, 0.9f, 1f);
     shapes.rect((float) a.x() - 0.25f, (float) a.y() - 0.1f, 0.5f, 0.2f);

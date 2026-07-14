@@ -41,6 +41,18 @@ public class MagnetismScene implements Scene {
   }
 
   @Override
+  public String controls() {
+    return "click: launch a charge   left/right: field strength   up/down: add E-field";
+  }
+
+  @Override
+  public java.util.List<String> readouts() {
+    return java.util.List.of(
+        "magnetic field B: " + Draw.num(magneticField, 1),
+        "electric field E: " + Draw.num(electricField.length(), 1));
+  }
+
+  @Override
   public void show() {
     reset();
   }
@@ -114,7 +126,11 @@ public class MagnetismScene implements Scene {
 
   @Override
   public void render(ShapeRenderer shapes) {
-    shapes.begin(ShapeType.Line);
+    shapes.begin(ShapeType.Filled);
+    // The walls the charges bounce off.
+    shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
+    Draw.box(shapes, 0.2, 0.2, 15.8, 8.8, 0.06f);
+    // Fading trails showing each charge's circular path.
     for (Trace trace : traces) {
       List<Vector2> trail = trace.trail;
       for (int i = 1; i < trail.size(); i++) {
@@ -126,7 +142,7 @@ public class MagnetismScene implements Scene {
         }
         Vector2 p0 = trail.get(i - 1);
         Vector2 p1 = trail.get(i);
-        shapes.line((float) p0.x(), (float) p0.y(), (float) p1.x(), (float) p1.y());
+        Draw.line(shapes, p0.x(), p0.y(), p1.x(), p1.y(), 0.03f);
       }
     }
     shapes.end();

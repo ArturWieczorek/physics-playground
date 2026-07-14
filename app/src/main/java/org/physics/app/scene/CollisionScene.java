@@ -36,6 +36,28 @@ public class CollisionScene implements Scene {
   }
 
   @Override
+  public String controls() {
+    return "click: fire the cue ball";
+  }
+
+  @Override
+  public List<String> readouts() {
+    double kineticEnergy = 0;
+    double momentumX = 0;
+    double momentumY = 0;
+    for (Particle ball : balls) {
+      kineticEnergy += ball.kineticEnergy();
+      momentumX += ball.mass() * ball.velocity().x();
+      momentumY += ball.mass() * ball.velocity().y();
+    }
+    double momentum = Math.hypot(momentumX, momentumY);
+    // With perfectly elastic collisions and walls, both of these hold steady.
+    return List.of(
+        "kinetic energy: " + Draw.num(kineticEnergy, 1),
+        "total momentum: " + Draw.num(momentum, 1));
+  }
+
+  @Override
   public void show() {
     reset();
   }
@@ -93,6 +115,9 @@ public class CollisionScene implements Scene {
   @Override
   public void render(ShapeRenderer shapes) {
     shapes.begin(ShapeType.Filled);
+    // The walls the balls bounce off.
+    shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
+    Draw.box(shapes, 0.05, 0.05, 15.95, 8.95, 0.1f);
     for (Particle ball : balls) {
       if (ball == cue) {
         shapes.setColor(0.95f, 0.95f, 0.98f, 1f); // cue ball, white

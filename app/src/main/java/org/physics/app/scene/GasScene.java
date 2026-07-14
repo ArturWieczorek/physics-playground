@@ -47,6 +47,19 @@ public class GasScene implements Scene {
   }
 
   @Override
+  public String controls() {
+    return "up/down: heat/cool";
+  }
+
+  @Override
+  public List<String> readouts() {
+    double temperature = MaxwellBoltzmann.temperature(world.bodies());
+    return List.of(
+        "temperature: " + Draw.num(temperature, 2),
+        "mean speed: " + Draw.num(MaxwellBoltzmann.meanSpeed(temperature, MASS), 2));
+  }
+
+  @Override
   public void show() {
     reset();
   }
@@ -121,6 +134,11 @@ public class GasScene implements Scene {
     }
     double yScale = HIST_HEIGHT / peak;
 
+    shapes.begin(ShapeType.Filled);
+    shapes.setColor(0.3f, 0.34f, 0.4f, 1f);
+    Draw.box(shapes, BOX_LEFT, BOX_BOTTOM, BOX_RIGHT, BOX_TOP, 0.06f);
+    shapes.end();
+
     drawParticles(shapes, bodies, maxSpeed);
     drawHistogram(shapes, density, yScale);
     drawTheoryCurve(shapes, temperature, binWidth, yScale);
@@ -156,7 +174,7 @@ public class GasScene implements Scene {
       ShapeRenderer shapes, double temperature, double binWidth, double yScale) {
     double histLeft = BOX_LEFT;
     double histSpan = BOX_RIGHT - BOX_LEFT;
-    shapes.begin(ShapeType.Line);
+    shapes.begin(ShapeType.Filled);
     shapes.setColor(1f, 0.8f, 0.2f, 1f);
     float prevX = 0;
     float prevY = 0;
@@ -166,7 +184,7 @@ public class GasScene implements Scene {
       float x = (float) (histLeft + (b / (double) BINS) * histSpan);
       float y = (float) (HIST_BASE + pdf * yScale);
       if (b > 0) {
-        shapes.line(prevX, prevY, x, y);
+        Draw.line(shapes, prevX, prevY, x, y, 0.06f);
       }
       prevX = x;
       prevY = y;

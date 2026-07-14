@@ -49,6 +49,16 @@ public class OrbitScene implements Scene {
   }
 
   @Override
+  public String controls() {
+    return "click: add a planet";
+  }
+
+  @Override
+  public java.util.List<String> readouts() {
+    return java.util.List.of("planets: " + planets.size());
+  }
+
+  @Override
   public void show() {
     reset();
   }
@@ -103,8 +113,8 @@ public class OrbitScene implements Scene {
 
   @Override
   public void render(ShapeRenderer shapes) {
-    // Trails first, as thin lines, so the planets draw on top.
-    shapes.begin(ShapeType.Line);
+    // Trails first, as fading comet tails, so the planets draw on top.
+    shapes.begin(ShapeType.Filled);
     for (OrbitBody planet : planets) {
       List<Vector2> trail = planet.trail;
       for (int i = 1; i < trail.size(); i++) {
@@ -112,7 +122,7 @@ public class OrbitScene implements Scene {
         shapes.setColor(planet.color[0], planet.color[1], planet.color[2], fade);
         Vector2 p0 = trail.get(i - 1);
         Vector2 p1 = trail.get(i);
-        shapes.line((float) p0.x(), (float) p0.y(), (float) p1.x(), (float) p1.y());
+        Draw.line(shapes, p0.x(), p0.y(), p1.x(), p1.y(), 0.03f);
       }
     }
     shapes.end();
