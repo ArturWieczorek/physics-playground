@@ -28,6 +28,7 @@ import org.physics.app.scene.LightScene;
 import org.physics.app.scene.MagnetismScene;
 import org.physics.app.scene.MolecularScene;
 import org.physics.app.scene.OrbitScene;
+import org.physics.app.scene.OrbitalScene;
 import org.physics.app.scene.PauliScene;
 import org.physics.app.scene.Scene;
 import org.physics.app.scene.SpringScene;
@@ -89,6 +90,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new DoublePendulumScene());
     scenes.add(new LightScene());
     scenes.add(new PauliScene());
+    scenes.add(new OrbitalScene());
     scenes.get(current).show();
   }
 

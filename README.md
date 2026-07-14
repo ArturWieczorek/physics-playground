@@ -27,6 +27,7 @@ A single app with a menu of scenes, each one a small experiment:
 - A double pendulum swinging in never-repeating chaos
 - Light drawn as its electric and magnetic fields, a travelling wave
 - A rotatable 3D surface of the two-electron wavefunction, showing the Pauli exclusion trench
+- Rotatable 3D electron-orbital clouds (s, p, d) built from the hydrogen wavefunctions
 
 ## How it is organised
 
@@ -78,6 +79,7 @@ and see exactly the code as it stood at that point.
 | ch16 | The double pendulum and chaos |
 | ch17 | Light: an electromagnetic wave |
 | ch18 | The Pauli exclusion principle (3D) |
+| ch19 | Electron orbitals: probability clouds (3D) |
 
 ## Running it
 
