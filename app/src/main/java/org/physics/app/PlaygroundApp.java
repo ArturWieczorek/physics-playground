@@ -17,9 +17,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
 import java.util.List;
+import org.physics.app.scene.BrachistochroneScene;
 import org.physics.app.scene.ChargesScene;
 import org.physics.app.scene.ClothScene;
 import org.physics.app.scene.CollisionScene;
+import org.physics.app.scene.DoublePendulumScene;
 import org.physics.app.scene.FluidScene;
 import org.physics.app.scene.GasScene;
 import org.physics.app.scene.MagnetismScene;
@@ -81,6 +83,8 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new MolecularScene());
     scenes.add(new ClothScene());
     scenes.add(new FluidScene());
+    scenes.add(new BrachistochroneScene());
+    scenes.add(new DoublePendulumScene());
     scenes.get(current).show();
   }
 
@@ -106,10 +110,17 @@ public class PlaygroundApp extends ApplicationAdapter {
   }
 
   private void handleInput() {
-    for (int i = 0; i < scenes.size(); i++) {
+    // The number keys jump to the first nine scenes; N and B cycle through all of them.
+    for (int i = 0; i < scenes.size() && i < 9; i++) {
       if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + i)) {
         switchTo(i);
       }
+    }
+    if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
+      switchTo((current + 1) % scenes.size());
+    }
+    if (Gdx.input.isKeyJustPressed(Input.Keys.B)) {
+      switchTo((current - 1 + scenes.size()) % scenes.size());
     }
     if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
       scenes.get(current).reset();
@@ -213,7 +224,7 @@ public class PlaygroundApp extends ApplicationAdapter {
 
   private String controlsLine(Scene scene) {
     String sceneControls = scene.controls();
-    String shared = "1-" + scenes.size() + " scenes   R reset   P pause   [ ] speed";
+    String shared = "1-9 or N/B: scenes   R reset   P pause   [ ] speed";
     return sceneControls.isEmpty() ? shared : sceneControls + "      " + shared;
   }
 

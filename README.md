@@ -23,6 +23,8 @@ A single app with a menu of scenes, each one a small experiment:
 - Atoms attracting and repelling through the Lennard-Jones potential, freezing and melting
 - A piece of cloth you can grab, swing, and tear
 - A pool of fluid you can splash and stir
+- A race down three ramps where the cleverest curve, not the straight one, wins
+- A double pendulum swinging in never-repeating chaos
 
 ## How it is organised
 
@@ -70,6 +72,8 @@ and see exactly the code as it stood at that point.
 | ch12 | Cloth you can tear |
 | ch13 | Fluid you can splash |
 | ch14 | Shipping it: desktop and web builds |
+| ch15 | The brachistochrone: the fastest descent |
+| ch16 | The double pendulum and chaos |
 
 ## Running it
 
@@ -81,8 +85,10 @@ Requirements: Java 21 or newer. Everything else is fetched by the build.
 ./gradlew spotlessApply       # format the code
 ```
 
-Switch scenes with the number keys, reset with R, and click or drag to interact. Each scene's
-controls are described in its chapter.
+Switch scenes with the number keys (or N and B to cycle), reset with R, pause with P, and slow
+down or speed up time with the `[` and `]` keys. Click or drag to interact, and use the arrow
+keys to adjust each scene's parameters. The heads-up display names the current scene, lists its
+controls, and shows its live numbers; each scene's controls are also described in its chapter.
 
 ### A packaged desktop app
 
