@@ -35,6 +35,7 @@ A single app with a menu of scenes, each one a small experiment:
 - The Lorenz attractor, the butterfly-shaped emblem of chaos, drawn in 3D
 - A pendulum wave: a row of pendulums rippling in and out of sync
 - A string of coupled springs vibrating in standing-wave modes
+- Resonance: a driven mass on a spring with its response curve
 
 ## How it is organised
 
@@ -94,6 +95,7 @@ and see exactly the code as it stood at that point.
 | ch24 | The Lorenz attractor (3D) |
 | ch25 | The pendulum wave |
 | ch26 | Coupled springs and standing waves |
+| ch27 | Resonance |
 
 ## Running it
 
