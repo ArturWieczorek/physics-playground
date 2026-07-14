@@ -28,6 +28,7 @@ A single app with a menu of scenes, each one a small experiment:
 - Light drawn as its electric and magnetic fields, a travelling wave
 - A rotatable 3D surface of the two-electron wavefunction, showing the Pauli exclusion trench
 - Rotatable 3D electron-orbital clouds (s, p, d) built from the hydrogen wavefunctions
+- The Laplace transform as a 3D surface, its poles rising as spikes over the complex plane
 
 ## How it is organised
 
@@ -80,6 +81,7 @@ and see exactly the code as it stood at that point.
 | ch17 | Light: an electromagnetic wave |
 | ch18 | The Pauli exclusion principle (3D) |
 | ch19 | Electron orbitals: probability clouds (3D) |
+| ch20 | The Laplace transform and its poles (3D) |
 
 ## Running it
 
