@@ -21,6 +21,7 @@ import org.physics.app.scene.BrachistochroneScene;
 import org.physics.app.scene.ChargesScene;
 import org.physics.app.scene.ClothScene;
 import org.physics.app.scene.CollisionScene;
+import org.physics.app.scene.CoupledSpringsScene;
 import org.physics.app.scene.DoublePendulumScene;
 import org.physics.app.scene.FluidScene;
 import org.physics.app.scene.FourierScene;
@@ -103,6 +104,7 @@ public class PlaygroundApp extends ApplicationAdapter {
     scenes.add(new FourierScene());
     scenes.add(new LorenzScene());
     scenes.add(new PendulumWaveScene());
+    scenes.add(new CoupledSpringsScene());
     scenes.get(current).show();
   }
 
